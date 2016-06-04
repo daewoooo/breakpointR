@@ -1,10 +1,3 @@
-#' @import ggplot2
-#' @import reshape2
-#' @import grid
-#' @importFrom cowplot plot_grid
-NULL
-
-
 #' Plotting function for BreakPointR
 #' This function will take stored RData files and plot them into a single PDF file
 #'

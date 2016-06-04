@@ -6,7 +6,8 @@
 \usage{
 runBreakpointr(input.data, pairedEndReads = TRUE, chromosomes = NULL,
   windowsize = 1e+06, scaleWindowSize = T, trim = 10, peakTh = 0.33,
-  zlim = 3.291, bg = 0.02, minReads = 20, maskRegions = NULL)
+  zlim = 3.291, bg = 0.02, min.mapq = 10, pair2frgm = FALSE,
+  minReads = 20, maskRegions = NULL)
 }
 \arguments{
 \item{input.data}{A file with aligned reads in BAM format.}

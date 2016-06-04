@@ -6,7 +6,7 @@
 \usage{
 breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
   reuse.existing.files = TRUE, windowsize = 1e+06, scaleWindowSize = TRUE,
-  pairedEndReads = FALSE, chromosomes = NULL,
+  pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
   remove.duplicate.reads = TRUE, min.mapq = 10, trim = 10,
   peakTh = 0.33, zlim = 3.291, bg = 0.02, minReads = 10,
   createCompositeFile = F, WC.cutoff = 0.9, maskRegions = NULL,

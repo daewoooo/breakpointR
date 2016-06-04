@@ -5,7 +5,8 @@
 \title{Import BAM file into GRanges}
 \usage{
 bam2GRanges(file, bamindex = file, chromosomes = NULL,
-  pairedEndReads = FALSE, min.mapq = 10, keep.duplicate.reads = TRUE)
+  pairedEndReads = FALSE, min.mapq = 10, keep.duplicate.reads = TRUE,
+  pair2frgm = FALSE)
 }
 \arguments{
 \item{file}{Bamfile with aligned reads.}

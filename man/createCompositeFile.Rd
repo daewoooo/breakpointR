@@ -5,7 +5,8 @@
 \title{Function to create composite Strand-seq file}
 \usage{
 createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
-  min.mapq = 10, keep.duplicate.reads = FALSE, WC.cutoff = 0.9)
+  pair2frgm = FALSE, min.mapq = 10, keep.duplicate.reads = FALSE,
+  WC.cutoff = 0.9)
 }
 \arguments{
 \item{chromosomes}{If only a subset of the chromosomes should be binned, specify them here.}

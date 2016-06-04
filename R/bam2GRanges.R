@@ -9,7 +9,7 @@
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param keep.duplicate.reads A logical indicating whether or not duplicate reads should be kept.
 #' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
-#' @importFrom GenomicAlignments readGAlignmentPairsFromBam readGAlignmentsFromBam first
+#' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
 #' @export
 
