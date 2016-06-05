@@ -97,9 +97,6 @@ if (createCompositeFile) {
 	if (!file.exists(savename)) {	
 		breakpoints <- runBreakpointr(input.data=fragments, pairedEndReads=conf[['pairedEndReads']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
 		save(breakpoints, file=savename)
-		if (length(breakpoints)) {
-			breaks.all.files[['CompositeFile']] <- breakpoints$breaks
-		}
 	} else {
 		breakpoints <- get(load(savename))
 	}
@@ -150,9 +147,6 @@ if (createCompositeFile) {
 		if (!file.exists(savename)) {
 			breakpoints <- runBreakpointr(input.data=file, pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
 			save(breakpoints, file=savename)
-			if (length(breakpoints)) {
-				breaks.all.files[[file]] <- breakpoints$breaks
-			}
 		} else {
 			breakpoints <- get(load(savename))
 		}
@@ -178,7 +172,7 @@ if (callHotSpots) {
 	for (file in files) {
 		breakpoints <- get(load(file))$breaks
 		if (length(breakpoints)) {
-        		breaks.all.files[[file]] <- breakpoints
+        		suppressWarnings( breaks.all.files[[file]] <- breakpoints ) #TODO check if this can be done without warnings
         	}	
 	}
 
