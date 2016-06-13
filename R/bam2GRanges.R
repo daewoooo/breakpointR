@@ -120,10 +120,12 @@ bam2GRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEndReads=FA
 			#data <- sort(c(data.frag.plus, data.frag.minus, data.singlets))
 			data <- sort(c(data.frag.plus, data.frag.minus))
 		} else {
-			data.first <- as(GenomicAlignments::first(data.raw), 'GRanges')
-			data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
-			strand(data.last) <- strand(data.first)
-			data <- sort(c(data.first, data.last))
+			#data.first <- as(GenomicAlignments::first(data.raw), 'GRanges')
+			#data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
+			#strand(data.last) <- strand(data.first)
+			#data <- sort(c(data.first, data.last))
+			data <- as(GenomicAlignments::first(data.raw), 'GRanges') #use only first mate of the read pair in subsequent analysis!!!
+
 			## Filter by mapping quality
 			if (!is.null(min.mapq)) {
 				if (any(is.na(mcols(data)$mapq))) {

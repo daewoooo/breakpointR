@@ -20,10 +20,10 @@ breakSeekr<- function(deltaWs, trim=10, peakTh=0.33, zlim=3.291)
   
   ## #group the breakpoints to refine at the peak of the peak:
  
-  if (mean(deltaW,na.rm=TRUE) <= 1) { # if mean is so low than there is no peak, skip library
-		message('no peaks here!')
-		return()
-	}
+#  if (mean(deltaW,na.rm=TRUE) <= 1) { # if mean is so low than there is no peak, skip library
+#		message('no peaks here!')
+#		return()
+#	}
   	
   trimVs<- deltaWs[quantile(deltaW, (trim/100) ) < deltaW & deltaW < quantile(deltaW, ((100-trim)/100) )]$deltaW  # trims the outer 5% limit of the deltaWs to calulate the stdev
   if(length(trimVs) <= 1){trimVs <- c(0,0,0)} #'*'#
