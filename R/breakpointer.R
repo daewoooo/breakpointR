@@ -7,6 +7,8 @@
 #' @param configfile A file specifying the parameters of this function (without \code{inputfolder}, \code{outputfolder} and \code{configfile}). Having the parameters in a file can be handy if many samples with the same parameter settings are to be run. If a \code{configfile} is specified, it will take priority over the command line parameters.
 #' @param numCPU The numbers of CPUs that are used. Should not be more than available on your machine.
 #' @param reuse.existing.files A logical indicating whether or not existing files in \code{outputfolder} should be reused.
+#' @param createCompositeFile Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)
+#' @param callHotSpots Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)
 
 #' @inheritParams runBreakpointr
 #' @inheritParams bam2GRanges
@@ -15,7 +17,7 @@
 #' @import foreach
 #' @import doParallel
 #' @export
-breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=TRUE, windowsize=1000000, scaleWindowSize=TRUE, pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, remove.duplicate.reads=TRUE, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, bg=0.02, minReads=10, createCompositeFile=F, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE) {
+breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=TRUE, windowsize=1000000, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, remove.duplicate.reads=TRUE, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, bg=0.02, minReads=10, createCompositeFile=F, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE) {
 
 #=======================
 ### Helper functions ###
@@ -54,7 +56,7 @@ if (!is.null(maskRegions)) {
 }
 
 ## Put options into list and merge with conf
-params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, scaleWindowSize=scaleWindowSize, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, remove.duplicate.reads=remove.duplicate.reads, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots)
+params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, remove.duplicate.reads=remove.duplicate.reads, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots)
 conf <- c(conf, params[setdiff(names(params),names(conf))])
 
 ## Input checks
@@ -95,7 +97,7 @@ if (createCompositeFile) {
 	fragments <- createCompositeFile(file.list=files, chromosomes=conf[['chromosomes']], pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], WC.cutoff=conf[['WC.cutoff']])		
 	## Find breakpoints
 	if (!file.exists(savename)) {	
-		breakpoints <- runBreakpointr(input.data=fragments, pairedEndReads=conf[['pairedEndReads']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
+		breakpoints <- runBreakpointr(input.data=fragments, pairedEndReads=conf[['pairedEndReads']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
 		save(breakpoints, file=savename)
 	} else {
 		breakpoints <- get(load(savename))
@@ -120,7 +122,7 @@ if (createCompositeFile) {
 		## Find breakpoints
 		if (!file.exists(savename)) {
 			tC <- tryCatch({
-				breakpoints <- runBreakpointr(input.data=file, pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
+				breakpoints <- runBreakpointr(input.data=file, pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
 			}, error = function(err) {
 				stop(file,'\n',err)
 			})
@@ -145,7 +147,7 @@ if (createCompositeFile) {
 		savename <- file.path(datapath,paste0(basename(file),'.RData'))
 		## Find breakpoints
 		if (!file.exists(savename)) {
-			breakpoints <- runBreakpointr(input.data=file, pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
+			breakpoints <- runBreakpointr(input.data=file, pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']])
 			save(breakpoints, file=savename)
 		} else {
 			breakpoints <- get(load(savename))
@@ -164,8 +166,8 @@ if (!is.null(maskRegions)) {
 	writeBedFile(index='MaskedRegions', outputDirectory=browserpath, maskedRegions=maskRegions)
 }
 
-## Search for SCE hotspots
-if (callHotSpots) {
+## Compile all breaks using disjoin function
+if (createCompositeFile==FALSE) {
 	files <- list.files(datapath, pattern=".RData$", full=T)
 
 	breaks.all.files <- GenomicRanges::GRangesList()
@@ -175,7 +177,18 @@ if (callHotSpots) {
         		suppressWarnings( breaks.all.files[[file]] <- breakpoints ) #TODO check if this can be done without warnings
         	}	
 	}
+	
+	breaks <- unlist(breaks.all.files, use.names=F)
+	ranges <- disjoin(breaks) # redefine ranges in df
+	hits <- countOverlaps(ranges, breaks) # counts number of breaks overlapping at each range
+ 	mcols(ranges)$hits <- hits # appends hits as a metacolumn in ranges
 
+	## write a bedgraph of data (overlapping breaks)
+	writeBedFile(index='BreakpointSummary', outputDirectory=browserpath, breaksGraph=ranges)
+}
+
+## Search for SCE hotspots
+if (callHotSpots) {
 	hotspots <- hotspotter(gr.list=breaks.all.files)
 	savename <- file.path(datapath,'SCE_HotSpots.RData')
 	if (length(hotspots)) {

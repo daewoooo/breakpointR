@@ -205,22 +205,48 @@ plotHeatmap <- function(datapath, plotLibraries = NULL, file=NULL) {
 
 	IDs <- list()
 	grl <- GRangesList()
+	breaks <- GRangesList()
 	for (i in libs2plot) {	
 		data <- get(load(files[[i]]))
 		IDs[[i]] <- basename(files[[i]])
 		grl[[i]] <- data$counts
+		suppressWarnings( breaks[[i]] <- data$breaks )
 	}
 
 	#transform bin coordinates of each chromosome into genomewide coordinates (cumulative sum of bin coordintes)
 	cum.seqlengths <- cumsum(as.numeric(seqlengths(grl[[1]])))
 	cum.seqlengths.0 <- c(0,cum.seqlengths[-length(cum.seqlengths)])
 	names(cum.seqlengths.0) <- seqlevels(grl[[1]])
+
+	#get positions of ends of each chromosome to plot lones between the chromosomes
+	chr.lines <- data.frame( y=cum.seqlengths[-length(cum.seqlengths)] )	
+
 	transCoord <- function(gr) {
 		gr$start.genome <- start(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
 		gr$end.genome <- end(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
 		return(gr)
 	}
 	grl <- endoapply(grl, transCoord)
+	
+	seqlevels(breaks) <- seqlevels(grl)
+	seqlengths(breaks) <- seqlengths(grl)
+
+	# disjoin overlaping breaks
+	breaks <- unlist(breaks, use.names=F)
+	ranges <- disjoin(breaks) # redefine ranges in df
+	hits <- countOverlaps(ranges, breaks) # counts number of breaks overlapping at each range
+ 	mcols(ranges)$hits <- hits
+
+	disjoin.breaks <- transCoord(ranges)
+	dfplot.disjoin.breaks <- as.data.frame(disjoin.breaks)
+
+	# Chromosome lines for heatmap
+	label.pos <- round( cum.seqlengths.0 + 0.5 * seqlengths(grl[[1]]) )
+	df.chroms <- data.frame(y=c(0,cum.seqlengths))
+
+	# Plot breaks summary
+	ggplt1 <- ggplot(dfplot.disjoin.breaks) + geom_rect(aes(ymin=0, ymax=hits, xmin=start.genome, xmax=end.genome), fill="red", color="red")
+	ggplt1 <- ggplt1 + geom_vline(aes_string(xintercept='y'), data=chr.lines, col='black') + scale_y_continuous(expand = c(0,0))
 
 	# Data
 	df <- list()
@@ -228,13 +254,10 @@ plotHeatmap <- function(datapath, plotLibraries = NULL, file=NULL) {
 		df[[length(df)+1]] <- data.frame(start=grl[[i1]]$start.genome, end=grl[[i1]]$end.genome, seqnames=seqnames(grl[[i1]]), sample=IDs[[i1]], state=grl[[i1]]$states)
 	}
 	df <- do.call(rbind, df)
-	# Chromosome lines
-	label.pos <- round( cum.seqlengths.0 + 0.5 * seqlengths(grl[[1]]) )
-	df.chroms <- data.frame(y=c(0,cum.seqlengths))
 
 	## PLOT
-	ggplt <- ggplot(df) + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) + scale_y_continuous(breaks=label.pos, labels=names(label.pos)) + coord_flip() + scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
-	ggplt <- ggplt + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
+	ggplt2 <- ggplot(df) + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) + scale_y_continuous(breaks=label.pos, labels=names(label.pos)) + coord_flip() + scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
+	ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
 
 	## PRINT TO FILE
 	## printing to a file or returning plot object
@@ -243,10 +266,10 @@ plotHeatmap <- function(datapath, plotLibraries = NULL, file=NULL) {
 		height.cm <- length(libs2plot) * 0.5
 		width.cm <- 200
 		pdf(file, width=width.cm/2.54, height=height.cm/2.54)
-		print(ggplt)
+		print(ggplt2)
 		d <- dev.off()
 	} else {
-		return(ggplt)
+		return(ggplt2)
 	}
 }
 

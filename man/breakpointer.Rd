@@ -5,7 +5,7 @@
 \title{Wrapper function for the breakpointR package}
 \usage{
 breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
-  reuse.existing.files = TRUE, windowsize = 1e+06, scaleWindowSize = TRUE,
+  reuse.existing.files = TRUE, windowsize = 1e+06, binMethod = "size",
   pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
   remove.duplicate.reads = TRUE, min.mapq = 10, trim = 10,
   peakTh = 0.33, zlim = 3.291, bg = 0.02, minReads = 10,
@@ -23,9 +23,13 @@ breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 
 \item{reuse.existing.files}{A logical indicating whether or not existing files in \code{outputfolder} should be reused.}
 
-\item{windowsize}{The window size used to calculate deltaWs, either an integer or 'scale'.}
+\item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on binMethod}
+
+\item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). Default = "size"}
 
 \item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
+
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
 
 \item{chromosomes}{If only a subset of the chromosomes should be processed, specify them here.}
 
@@ -41,7 +45,11 @@ breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 
 \item{minReads}{The minimum number of reads required for genotyping.}
 
+\item{createCompositeFile}{Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)}
+
 \item{maskRegions}{List of regions to be excluded from the analysis (format: chromosomes start end)}
+
+\item{callHotSpots}{Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)}
 }
 \description{
 This function is an easy-to-use wrapper to find breakpoints with \code{\link[breakpointR]{runBreakpointr}} in parallel.

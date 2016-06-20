@@ -11,17 +11,19 @@
 #' @param input.data A file with aligned reads in BAM format.
 #' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your file.
 #' @param chromosomes If only a subset of the chromosomes should be processed, specify them here.
-#' @param windowsize The window size used to calculate deltaWs, either an integer or 'scale'.
+#' @param windowsize The window size used to calculate deltaWs, either number of reads or genomic size depending on binMethod
+#' @param binMethod Method used to calculate optimal number of reads in the window ("size", "reads"). Default = "size"
 #' @param trim The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).
 #' @param peakTh The treshold that the peak deltaWs must pass to be considered a breakpoint.
 #' @param zlim The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).
 #' @param bg The amount of background introduced into the genotype test.
+#' @param pair2frgm Set to \code{TRUE} if every paired-end read should be merged into a single fragment
 #' @param minReads The minimum number of reads required for genotyping.
 #' @param maskRegions List of regions to be excluded from the analysis (format: chromosomes start end)
 #' @author Ashley Sanders, David Porubsky, Aaron Taudt
 #' @export
 
-runBreakpointr <- function(input.data, pairedEndReads=TRUE, chromosomes=NULL, windowsize=1000000, scaleWindowSize=T, trim=10, peakTh=0.33, zlim=3.291, bg=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL) {
+runBreakpointr <- function(input.data, pairedEndReads=TRUE, chromosomes=NULL, windowsize=1000000, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, bg=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL) {
 
 	## check the class of the input data, make GRanges object of file
 	if ( class(input.data) != "GRanges" ) {
@@ -34,24 +36,10 @@ runBreakpointr <- function(input.data, pairedEndReads=TRUE, chromosomes=NULL, wi
 	filename <- basename(input.data)
 	message("Working on ", filename)
 	
-	if (scaleWindowSize==F) {
-		reads.per.window <- windowsize
-		message("  Calculating deltaWs")
-		dw <- deltaWCalculator(fragments, reads.per.window=reads.per.window)
-	}
-	
 	## remove reads from maskRegions
 	if (!is.null(maskRegions)) {
-		#mask.df <- read.table(maskRegions, header=F, sep="\t", stringsAsFactors=F)
-		#if (any(mask.df$V1 %in% chromosomes)) {
-		#	mask.df <- mask.df[mask.df$V1 %in% chromosomes,] #select only chromosomes submited for analysis
-		#	mask.gr <- GenomicRanges::GRanges(seqnames=mask.df$V1, IRanges(start=mask.df$V2, end=mask.df$V3))
-			#mask <- findOverlaps(mask.gr, fragments)
-			mask <- findOverlaps(maskRegions, fragments)
-			fragments <- fragments[-subjectHits(mask)]			
-		#} else {
-		#	warning(paste0('Skipping maskRegions. Chromosomes names conflict: ', mask.df$V1[1], ' not equal ',chromosomes[1]))
-		#}	
+		mask <- findOverlaps(maskRegions, fragments)
+		fragments <- fragments[-subjectHits(mask)]				
 	} 
 
 	reads.all.chroms <- GenomicRanges::GRangesList()
@@ -66,15 +54,18 @@ runBreakpointr <- function(input.data, pairedEndReads=TRUE, chromosomes=NULL, wi
 		fragments.chr <- keepSeqlevels(fragments.chr, chr)
 
 		message("    calculating deltaWs")
-		if (scaleWindowSize==T) {
-			## normalize only for size of the chromosome 1
-			#reads.per.window <- max(10, round(windowsize/(seqlengths(fragments)[1]/seqlengths(fragments)[chr]))) # scales the bin to chr size, anchored to chr1 (249250621 bp)
-			
+		if (binMethod == "size") {
 			## normalize for size of chromosome one and for read counts of each chromosome
 			tiles <- unlist(tileGenome(seqlengths(fragments)[chr], tilewidth = windowsize))
 			counts <- countOverlaps(tiles, fragments.chr)
 			reads.per.window <- max(10, round(mean(counts[counts>0], trim=0.05)))
 		
+			dw <- deltaWCalculator(fragments.chr, reads.per.window=reads.per.window)
+		} else if (binMethod == "reads") {
+			## normalize only for size of the chromosome 1
+			#reads.per.window <- max(10, round(windowsize/(seqlengths(fragments)[1]/seqlengths(fragments)[chr]))) # scales the bin to chr size, anchored to chr1 (249250621 bp)
+			## do not normalize to the size of the chromosome 1
+			reads.per.window <- windowsize 
 			dw <- deltaWCalculator(fragments.chr, reads.per.window=reads.per.window)
 		}
 		deltaWs <- dw[seqnames(dw)==chr]
@@ -175,7 +166,7 @@ runBreakpointr <- function(input.data, pairedEndReads=TRUE, chromosomes=NULL, wi
 	names(counts.all.chroms) <- NULL
 	
 	## save set parameters for future reference
-	parameters <- c(windowsize=windowsize, scaleWindowSize=scaleWindowSize, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads)
+	parameters <- c(windowsize=windowsize, binMethod=binMethod, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads)
 
 	data.obj <- list(fragments=fragments, deltas=deltas.all.chroms, breaks=breaks.all.chroms, counts=counts.all.chroms, params=parameters)
 

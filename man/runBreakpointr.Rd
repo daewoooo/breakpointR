@@ -5,7 +5,7 @@
 \title{Wrapper function for breakpointR}
 \usage{
 runBreakpointr(input.data, pairedEndReads = TRUE, chromosomes = NULL,
-  windowsize = 1e+06, scaleWindowSize = T, trim = 10, peakTh = 0.33,
+  windowsize = 1e+06, binMethod = "size", trim = 10, peakTh = 0.33,
   zlim = 3.291, bg = 0.02, min.mapq = 10, pair2frgm = FALSE,
   minReads = 20, maskRegions = NULL)
 }
@@ -16,7 +16,9 @@ runBreakpointr(input.data, pairedEndReads = TRUE, chromosomes = NULL,
 
 \item{chromosomes}{If only a subset of the chromosomes should be processed, specify them here.}
 
-\item{windowsize}{The window size used to calculate deltaWs, either an integer or 'scale'.}
+\item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on binMethod}
+
+\item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). Default = "size"}
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 
@@ -25,6 +27,8 @@ runBreakpointr(input.data, pairedEndReads = TRUE, chromosomes = NULL,
 \item{zlim}{The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).}
 
 \item{bg}{The amount of background introduced into the genotype test.}
+
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
 
 \item{minReads}{The minimum number of reads required for genotyping.}
 
