@@ -1,29 +1,38 @@
 Package: breakpointR
 Type: Package
 Title: Find breakpoints in Strand-seq data
-Version: 0.1
+Version: 0.99.0
 Date: 2015-10-05
 Author: Ashley Sanders, David Porubsky, Aaron Taudt
 Maintainer: David Porubsky <d.porubsky@umcg.nl>
-Description: This package implements functions for finding breakpoints, plottingand export of strand-seq data.
+Description: This package implements functions for finding breakpoints, plotting and export of Strand-seq data.
 Depends:
-  R (>= 3.1.0),
+  R (>= 3.3.0),
   GenomicRanges,
-  ggplot2,
-  reshape2,
-  cowplot
+  cowplot,
+  strandseqExampleData
 Imports:
+  methods,
+  utils,
+  grDevices,
+  stats,
+  S4Vectors,
+  GenomeInfoDb,
   IRanges,
   Rsamtools,
-  Biostrings,
   GenomicAlignments,
-  grid,
-  gtools
+  ggplot2,
+  BiocGenerics,
+  gtools,
+  doParallel,
+  foreach
 Suggests:
   knitr,
   testthat
-License: 
+License: file LICENSE
 LazyLoad: yes
 VignetteBuilder: knitr
 Packaged: 2015-09-19 13:29:00 CET+1; Taudt
+biocViews: Software, Sequencing
+URL: https://github.com/daewoooo/BreakPointR
 RoxygenNote: 5.0.1

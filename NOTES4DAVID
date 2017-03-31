@@ -1,0 +1,16 @@
+Still to do:
+  o Please update the documentation in all places marked with TODO:DAVID
+  o Try to break your code intentionally and then make sure this cannot happen anymore. Here are two examples that I found:
+    1) Problem: #' @param callHotSpots Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)
+       At some point someone will use this function with callHotSpots=TRUE and createCompositeFile=TRUE.
+       Solution: #' @param callHotSpots Search for regions of high abundance of breakpoints in single cells (callHotSpots=TRUE will force createCompositeFile=FALSE)
+       Set createCompositeFile to FALSE if callHotSpots=TRUE or make sure that such non-sensical input causes an informative error at the very beginning.
+    2) Running breakpointer with all chromosomes results in an error. Make sure your functions can handle all possible input. I have attempted to fix this, but not tested it rigorously.
+
+Conventions to follow for any future coding:
+  o use TRUE/FALSE instead of T/F
+  o line indent a multiple of 4 spaces, no tabs
+  o use full names like Rsamtools::readBam instead of only readBam, put Rsamtools in Imports (it is not required to be in the NAMESPACE like this)
+  o use aes_string() instead of aes() for plotting
+  o Add @return section to every documented function
+  o Add runnable @examples to every @export-ed function
