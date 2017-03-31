@@ -32,8 +32,8 @@ deltaWCalculator <- function(frags, reads.per.window=10) {
 	for (chrom in chroms2parse) {
 		f <- frags.split[[chrom]]
 		f <- f[order(start(f))]
-		f$pcsum <- sum(strand(f)=='+')
-		f$mcsum <- sum(strand(f)=='-')
+		f$pcsum <- cumsum(strand(f)=='+')
+		f$mcsum <- cumsum(strand(f)=='-')
 		f$preads <- c(rep(NA,reads.per.window),diff(BiocGenerics::as.vector(f$pcsum),lag=reads.per.window))
 		f$mreads <- c(rep(NA,reads.per.window),diff(BiocGenerics::as.vector(f$mcsum),lag=reads.per.window))
 		f$deltaW <- abs(c(diff(f$preads,lag=reads.per.window),rep(NA,reads.per.window)))
