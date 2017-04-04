@@ -20,67 +20,46 @@
 #'                          chromosomes=paste0('chr', c(1:22,'X')))
 #'## Plot them
 #'plotBreakpoints(brkpts)
-#'
-plotBreakpoints <- function(breakpoints, file=NULL) {
+
+plotBreakpoints <- function(files2plot, file=NULL) {
   
-    if (class(breakpoints) == class.breakpoint) {
+    if (class(files2plot) == class.breakpoint) {
         numplots <- 1
-        breakpoints <- list(breakpoints)
+        files2plot <- list(files2plot)
     } else {
-        numplots <- length(breakpoints)
+        numplots <- length(files2plot)
     } 
   
     plots <- list()
     for (i in 1:numplots) {
     
-        filename <- names(breakpoints)[i]
+        filename <- basename(files2plot)[i]
         if (!is.null(filename)) {
           ptm <- startTimedMessage("Working on plot ", filename, " ...")
         } else {
           ptm <- startTimedMessage("Working on plot ", i, " ...")
         }
-        data <- loadFromFiles(breakpoints[[i]], check.class=class.breakpoint)[[1]]
-        
+        data <- loadFromFiles(files2plot[[i]], check.class=class.breakpoint)[[1]]
         
         reads <- data$fragments
+        chroms2plot <- seqlevels(reads)
         breaks <- data$breaks
         counts <- data$counts
-    
-        bin_size <- 200000
-        chrom2use <- levels(seqnames(reads))
-        seqlengths <- seqlengths(reads)
-        binned.data <- GenomicRanges::GRangesList()
-        #seqlevels(binned.data) <- chrom2use
-    
-        for (j in chrom2use) {
-            chrom_gr <- reads[reads@seqnames == j,]
-            if (length(chrom_gr) > 0) {
-                max_pos <- max(start(chrom_gr))
-                numbins <- floor(max_pos/bin_size) #calculate number of bins
-                ir <- successiveIRanges(rep(bin_size,numbins)) #create continuous ranges based on number of bins and the binsize
-                lastBinWidth <- max_pos - (bin_size*numbins)
-                lastBinStart <- (max_pos - lastBinWidth) + 1
-                lastRange <- IRanges(start = lastBinStart, width = lastBinWidth) #calculate last range
-                ir <- c(ir,lastRange)
-                chr <- rep(j, length(ir))
-                rows <- rep(0,length(ir))
-                gr <- GRanges(seqnames=j, ranges=ir, Watsonreads=rows, Crickreads=rows, bothreads=rows) #initialize GRanges object to store bin read counts
-            
-                #counts overlaps between bins and our reads
-                Watsonreads <- GenomicRanges::countOverlaps(gr, chrom_gr[strand(chrom_gr)=='-']) 
-                Crickreads <- GenomicRanges::countOverlaps(gr, chrom_gr[strand(chrom_gr)=='+'])
-                bothreads <- Watsonreads + Crickreads
-              
-                mcols(gr)$bothreads <- bothreads
-                mcols(gr)$Watsonreads <- Watsonreads
-                mcols(gr)$Crickreads <- Crickreads
-            
-                binned.data[[j]] <- gr #store binned data for current chromosome in a GRanges list
-            }
-        }
-      
-        seqlevels(binned.data) <- chrom2use
-        seqlengths(binned.data) <- seqlengths
+        lib.metrics <- data$lib.metrics
+        lib.metrics <- round(lib.metrics, digits = 5)
+        lib.metrics <- paste(names(lib.metrics), lib.metrics, sep = '=')
+        lib.metrics <- paste(lib.metrics, collapse = "  |  ")
+        
+        binned.data <- unlist(tileGenome(seqlengths(reads), tilewidth = 200000))
+        
+        #counts overlaps between bins and our reads
+        Watsonreads <- GenomicRanges::countOverlaps(binned.data, reads[strand(reads)=='-']) 
+        Crickreads <- GenomicRanges::countOverlaps(binned.data, reads[strand(reads)=='+'])
+        bothreads <- Watsonreads + Crickreads
+        
+        mcols(binned.data)$bothreads <- bothreads
+        mcols(binned.data)$Watsonreads <- Watsonreads
+        mcols(binned.data)$Crickreads <- Crickreads
       
         #transform bin coordinates of each chromosome into genomewide coordinates (cumulative sum of bin coordintes)
         cum.seqlengths <- cumsum(as.numeric(seqlengths(binned.data)))
@@ -98,7 +77,7 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
             return(gr)
         }
       
-        binned.data <- unname(unlist(binned.data))
+        #binned.data <- unname(unlist(binned.data))
       
         trans.reads <- transCoord(binned.data)
         trans.breaks <- transCoord(breaks)
@@ -132,11 +111,11 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
         dfplot.reads$mCrickreads <- -dfplot.reads$Crickreads
         ggplt1 <- ggplot(dfplot.reads) + geom_linerange(aes_string(ymin=0, ymax='mCrickreads', x='midpoint'), color="paleturquoise4", size=0.2)
         ggplt1 <- ggplt1 + geom_linerange(aes_string(ymin=0, ymax='Watsonreads', x='midpoint'), color="sandybrown", size=0.2) + scale_y_continuous(limits = c(-limit,limit))
-        ggplt1 <- ggplt1 + geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') + xlab("Chromosomes") + ylab("States") + scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + my_theme + ggtitle(filename)
-      
+        ggplt1 <- ggplt1 + geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') + xlab(NULL) + ylab("Read counts") + scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + my_theme + ggtitle(filename, subtitle = lib.metrics)
+        
         ### PLOT COUNTS
       
-        if (length(breaks)) {
+        #if (length(breaks)) {
             ## Scaling size of the rectangle to amout of reads in a given region
             scale <- (dfplot.counts[,c('Ws','Cs')] / dfplot.counts$width) * 1000000
           
@@ -163,14 +142,14 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
         
             ggplt2 <- ggplot(dfplot.counts) + geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand')) + scale_fill_manual(values=c("sandybrown","paleturquoise4"))
             ggplt2 <- ggplt2 + geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black')
-            ggplt2 <- ggplt2 + geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) + xlab(NULL) + ylab("Strands") + scale_x_continuous(expand = c(0,0)) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + my_theme
+            ggplt2 <- ggplt2 + geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) + xlab(NULL) + ylab("Breaks") + scale_x_continuous(expand = c(0,0)) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + my_theme
         
         
             ### PLOT STATES
         
             ggplt3 <- ggplot(dfplot.counts) + geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax=10, fill='states'))
             ggplt3 <- ggplt3 + geom_linerange(data=chr.lines, aes_string(ymin=0, ymax=10, x='y'), col='black') + xlab("Chromosomes") + ylab("States") +   scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) + scale_fill_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(axis.text.y=element_blank(), axis.ticks.y=element_blank()) + my_theme
-        }
+        #}
       
         ### PLOT ALL
       
@@ -189,7 +168,7 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
     if (!is.null(file)) {
         message("Printing to PDF ",file)
     
-        grDevices::pdf(file, width=30, height=10)
+        grDevices::pdf(file, width=length(chroms2plot), height=5)
         bquiet = lapply(plots, print)
         d <- grDevices::dev.off()
     } else {
@@ -205,6 +184,7 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
 #'
 #' @param breakpoints A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.
 #' @param file Name of the file to plot to.
+#' @param hotspots
 #' @return A \code{\link[ggplot2:ggplot]{ggplot}} object of \code{NULL}, depending on option \code{file}.
 #' 
 #' @author David Porubsky, Aaron Taudt, Ashley Sanders
@@ -216,12 +196,12 @@ plotBreakpoints <- function(breakpoints, file=NULL) {
 #'## Plot the heatmap
 #'plotHeatmap(example_BreakPoints)
 #'
-plotHeatmap <- function(breakpoints, hotspots=NULL, file=NULL) {
+plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
-    if (class(breakpoints) == class.breakpoint) {
+    if (class(files2plot) == class.breakpoint) {
         stop("Cannot make heatmap from only one object.")
     } else {
-        numlibs2plot <- length(breakpoints)
+        numlibs2plot <- length(files2plot)
     } 
   
     message("Preparing heatmap from ",numlibs2plot, " libraries")
@@ -230,7 +210,7 @@ plotHeatmap <- function(breakpoints, hotspots=NULL, file=NULL) {
     grl <- GRangesList()
     breaks <- GRangesList()
     for (i in 1:numlibs2plot) {  
-        data <- loadFromFiles(breakpoints[[i]], check.class=class.breakpoint)
+        data <- loadFromFiles(files2plot[[i]], check.class=class.breakpoint)
         IDs[[i]] <- data[[1]]$ID
         grl[[i]] <- data[[1]]$counts
         suppressWarnings( breaks[[i]] <- data[[1]]$breaks )
@@ -241,19 +221,12 @@ plotHeatmap <- function(breakpoints, hotspots=NULL, file=NULL) {
     cum.seqlengths.0 <- c(0,cum.seqlengths[-length(cum.seqlengths)])
     names(cum.seqlengths.0) <- seqlevels(grl[[1]])
 
-    #get positions of ends of each chromosome to plot lones between the chromosomes
-    chr.lines <- data.frame( y=cum.seqlengths[-length(cum.seqlengths)] )  
-
     transCoord <- function(gr) {
         gr$start.genome <- start(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
         gr$end.genome <- end(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
         return(gr)
     }
     grl <- endoapply(grl, transCoord)
-    if (!is.null(hotspots)) {
-      hot <- transCoord(hotspots)
-      hot$midpoint <- hot$start.genome + ((hot$end.genome - hot$start.genome)/2)  
-    }
     
     seqlevels(breaks) <- seqlevels(grl)
     seqlengths(breaks) <- seqlengths(grl)
@@ -270,10 +243,21 @@ plotHeatmap <- function(breakpoints, hotspots=NULL, file=NULL) {
     # Chromosome lines for heatmap
     label.pos <- round( cum.seqlengths.0 + 0.5 * seqlengths(grl[[1]]) )
     df.chroms <- data.frame(y=c(0,cum.seqlengths))
+    
+    my_theme <- theme(
+      legend.position="none",
+      panel.background=element_blank(),
+      panel.border=element_blank(),
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      plot.background=element_blank(),
+      axis.text.x=element_blank(),
+      axis.ticks.x=element_blank()  
+    )
 
     # Plot breaks summary
     ggplt1 <- ggplot(dfplot.disjoin.breaks) + geom_rect(aes_string(ymin=0, ymax='hits', xmin='start.genome', xmax='end.genome'), fill="red", color="red")
-    ggplt1 <- ggplt1 + geom_vline(aes_string(xintercept='y'), data=chr.lines, col='black') + scale_y_continuous(expand = c(0,0))
+    ggplt1 <- ggplt1 + geom_vline(aes_string(xintercept='y'), data=df.chroms, col='black') + scale_y_continuous(expand = c(0,0)) +ylab("Break\ncounts") + my_theme
 
     # Data
     df <- list()
@@ -283,22 +267,134 @@ plotHeatmap <- function(breakpoints, hotspots=NULL, file=NULL) {
     df <- do.call(rbind, df)
 
     ## PLOT
-    ggplt2 <- ggplot(df) + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) + scale_y_continuous(breaks=label.pos, labels=names(label.pos)) + coord_flip() + scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
-    ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
-    if (!is.null(hotspots)) { ggplt2 <- ggplt2 + geom_hline(yintercept = hot$midpoint, color="red", alpha=0.5) }  
+    if (is.null(hotspots)) {
+      ggplt2 <- ggplot(df) + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) + scale_y_continuous(breaks=label.pos, labels=names(label.pos)) + coord_flip() + scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
+      ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
+    } else {
+      hotspots.trans <- transCoord(hotspots)
+      hotspot.midpoint <- hotspots.trans$start.genome + (hotspots.trans$end.genome - hotspots.trans$start.genome)/2
+      hotspot.midpoint <- data.frame(y=hotspot.midpoint)
+      ggplt2 <- ggplot(df) + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) + scale_y_continuous(breaks=label.pos, labels=names(label.pos)) + coord_flip() + scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) + theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
+      ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black') + geom_hline(aes_string(yintercept='y'), data=hotspot.midpoint, col='red', alpha=0.5)
+    }  
+   
+    #p <- align.plots(ggplt1, ggplt2, ncol = 1, heights = c(1,10), draw = F)
     
     ## PRINT TO FILE
     ## printing to a file or returning plot object
     if (!is.null(file)) {
         message("Printing to PDF ",file)
-        height.cm <- length(libs2plot) * 0.5
+        height.cm <- length(files2plot) * 0.5
         width.cm <- 200
-        grDevices::pdf(file, width=width.cm/2.54, height=height.cm/2.54)
+        grDevices::pdf(file, width=width.cm/5, height=height.cm/5)
         print(ggplt2)
         d <- grDevices::dev.off()
+        #p <- arrangeGrob(p)
+        #ggsave(file=file, p, width=width.cm/5, height=height.cm/5, limitsize = F, device = "pdf")
     } else {
+        #return(p)
         return(ggplt2)
     }
 }
 
+#######################################################################################################################
+## Helper function for plot alignment from egg package
 
+align.plots <- function(..., plots = list(...)) 
+{
+  n <- length(plots)
+  grobs <- lapply(plots, ggplotGrob)
+  
+  heights <- c(1,10)
+  widths <- NULL
+  ncol = 1
+  
+  if (is.numeric(heights)) 
+    heights <- lapply(heights, unit, "null")
+  if (grid::is.unit(heights)) 
+    widths <- as.unit.list(heights)
+  
+  if (is.null(widths)) 
+    widths <- lapply(rep(1, n), unit, "null")
+  if (grid::is.unit(widths)) 
+    widths <- as.unit.list(widths)
+
+  splits <- rep(1, n)
+
+  fg <- mapply(gtable_frame, g = grobs, width = widths, height = heights, SIMPLIFY = FALSE)
+  spl <- split(fg, splits)
+
+  cols <- lapply(spl, function(.c) do.call(gridExtra::rbind.gtable, .c))
+  all <- do.call(gridExtra::cbind.gtable, cols)
+
+  if (draw) {
+    if (newpage) 
+      grid.newpage()
+    grid.draw(all)
+  }
+  invisible(all)
+}
+
+
+gtable_frame <- function(g, width = unit(1, "null"), height = unit(1, "null"), debug = FALSE) 
+{
+  panels <- g[["layout"]][grepl("panel", g[["layout"]][["name"]]), 
+                          ]
+  ll <- unique(panels$l)
+  tt <- unique(panels$t)
+  fixed_ar <- g$respect
+  if (fixed_ar) {
+    ar <- as.numeric(g$heights[tt[1]])/as.numeric(g$widths[ll[1]])
+    height <- width * ar
+    g$respect <- FALSE
+  }
+  core <- g[seq(min(tt), max(tt)), seq(min(ll), max(ll))]
+  top <- g[seq(1, min(tt) - 1), seq(min(ll), max(ll))]
+  bottom <- g[seq(max(tt) + 1, nrow(g)), seq(min(ll), max(ll))]
+  left <- g[seq(min(tt), max(tt)), seq(1, min(ll) - 1)]
+  right <- g[seq(min(tt), max(tt)), seq(max(ll) + 1, ncol(g))]
+  fg <- grid::nullGrob()
+  if (length(left)) {
+    lg <- gtable::gtable_add_cols(left, unit(1, "null"), 
+                                  0)
+    lg <- gtable::gtable_add_grob(lg, fg, 1, l = 1)
+  }
+  else {
+    lg <- fg
+  }
+  if (length(right)) {
+    rg <- gtable::gtable_add_cols(right, unit(1, "null"))
+    rg <- gtable::gtable_add_grob(rg, fg, 1, l = ncol(rg))
+  }
+  else {
+    rg <- fg
+  }
+  if (length(top)) {
+    tg <- gtable::gtable_add_rows(top, unit(1, "null"), 0)
+    tg <- gtable::gtable_add_grob(tg, fg, t = 1, l = 1)
+  }
+  else {
+    tg <- fg
+  }
+  if (length(bottom)) {
+    bg <- gtable::gtable_add_rows(bottom, unit(1, "null"), 
+                                  -1)
+    bg <- gtable::gtable_add_grob(bg, fg, t = nrow(bg), l = 1)
+  }
+  else {
+    bg <- fg
+  }
+  grobs = list(fg, tg, fg, lg, core, rg, fg, bg, fg)
+  widths <- unit.c(sum(left$widths), width, sum(right$widths))
+  heights <- unit.c(sum(top$heights), height, sum(bottom$heights))
+  all <- gtable::gtable_matrix("all", grobs = matrix(grobs, ncol = 3, nrow = 3, byrow = TRUE), widths = widths, heights = heights)
+  if (debug) {
+    hints <- grid::rectGrob(gp = gpar(fill = NA, lty = 2, lwd = 0.2))
+    tl <- expand.grid(t = 1:3, l = 1:3)
+    all <- gtable::gtable_add_grob(all, replicate(9, hints, simplify = FALSE), t = tl$t, l = tl$l, z = Inf, name = "debug")
+  }
+  all[["layout"]][5, "name"] <- "panel"
+  if (fixed_ar) 
+    all$respect <- TRUE
+  all
+}

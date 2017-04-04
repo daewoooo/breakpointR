@@ -6,8 +6,8 @@
 \usage{
 runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
   chromosomes = NULL, windowsize = 1e+06, binMethod = "size", trim = 10,
-  peakTh = 0.33, zlim = 3.291, bg = 0.02, min.mapq = 10,
-  pair2frgm = FALSE, minReads = 20, maskRegions = NULL)
+  peakTh = 0.33, zlim = 3.291, background = 0.02, min.mapq = 10,
+  pair2frgm = FALSE, minReads = 20, maskRegions = NULL, conf = 0.99)
 }
 \arguments{
 \item{bamfile}{A file with aligned reads in BAM format.}
@@ -24,19 +24,21 @@ runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 
-\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint.}
+\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint (e.g. 0.33 is 1/3 of max(delta)).}
 
 \item{zlim}{The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).}
 
-\item{bg}{The amount of background introduced into the genotype test.}
+\item{background}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
 \item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
 
-\item{minReads}{The minimum number of reads required for genotyping.}
+\item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
 \item{maskRegions}{List of regions to be excluded from the analysis (format: chromosomes start end)}
+
+\item{conf}{Desired confidence interval.}
 }
 \value{
 A \code{\link{BreakPoint}} object.

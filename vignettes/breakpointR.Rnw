@@ -55,8 +55,7 @@ to run another analysis with the same parameter settings.
 toLatex(sessionInfo())
 @
 
-
-%\bibliography{references}
+\bibliography{references}
 
 
 \end{document}

@@ -5,12 +5,11 @@
 \title{Main function for the \pkg{\link{breakpointR}} package}
 \usage{
 breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
-  reuse.existing.files = TRUE, windowsize = 1e+06, binMethod = "size",
+  reuse.existing.files = FALSE, windowsize = 1e+06, binMethod = "size",
   pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
-  remove.duplicate.reads = TRUE, min.mapq = 10, trim = 10,
-  peakTh = 0.33, zlim = 3.291, bg = 0.02, minReads = 10,
-  createCompositeFile = FALSE, WC.cutoff = 0.9, maskRegions = NULL,
-  callHotSpots = FALSE)
+  min.mapq = 10, trim = 10, peakTh = 0.33, zlim = 3.291,
+  background = 0.02, minReads = 10, createCompositeFile = FALSE,
+  WC.cutoff = 0.9, maskRegions = NULL, callHotSpots = FALSE)
 }
 \arguments{
 \item{inputfolder}{Folder with BAM files.}
@@ -33,19 +32,9 @@ breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 
 \item{chromosomes}{If only a subset of the chromosomes should be binned, specify them here.}
 
-\item{remove.duplicate.reads}{A logical indicating whether or not duplicate reads should be kept.}
-
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
-\item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
-
-\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint.}
-
-\item{zlim}{The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).}
-
-\item{bg}{The amount of background introduced into the genotype test.}
-
-\item{minReads}{The minimum number of reads required for genotyping.}
+\item{background}{The amount of background introduced into the genotype test.}
 
 \item{createCompositeFile}{Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)}
 

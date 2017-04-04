@@ -4,12 +4,12 @@
 \alias{plotBreakpoints}
 \title{Plotting functions for \pkg{\link{breakpointR}}}
 \usage{
-plotBreakpoints(breakpoints, file = NULL)
+plotBreakpoints(files2plot, file = NULL)
 }
 \arguments{
-\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
-
 \item{file}{Name of the file to plot to.}
+
+\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
 }
 \value{
 A list with \code{\link[ggplot2:ggplot]{ggplot}} objects.
@@ -26,7 +26,6 @@ brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE,
                          chromosomes=paste0('chr', c(1:22,'X')))
 ## Plot them
 plotBreakpoints(brkpts)
-
 }
 \author{
 David Porubsky, Aaron Taudt, Ashley Sanders

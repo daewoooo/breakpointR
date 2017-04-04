@@ -30,7 +30,7 @@
 #'breakpointer(inputfolder, outputfolder, chromosomes=paste0("chr", c(1:22, "X")),
 #'             pairedEndReads=FALSE)
 #'
-breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=TRUE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, remove.duplicate.reads=TRUE, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, bg=0.02, minReads=10, createCompositeFile=FALSE, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE, estimate.back=FALSE) {
+breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, background=0.02, minReads=10, createCompositeFile=FALSE, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE) {
 
 #=======================
 ### Helper functions ###
@@ -39,14 +39,34 @@ as.object <- function(x) {
     return(eval(parse(text=x)))
 }
 
+summarizeBreaks <- function(breakpoints) {
+  breaks <- breakpoints$breaks
+  confint <- breakpoints$confint
+  if (length(breaks)>0 & length(confint)==length(breaks)) {
+    breaks.df <- as(breaks, 'data.frame')
+    confint.df <- as(confint, 'data.frame')
+    breaks.df <- breaks.df[,c('seqnames','start','end')]
+    confint.df <- confint.df[,c('start','end','genoT')]
+    breaksSummary <- cbind(breaks.df, confint.df)
+    names(breaksSummary) <- c('seqnames','start','end','CI.start','CI.end','genoT')
+    return(breaksSummary)
+  } else if (length(breaks)>0 & length(confint)==0) {
+    breaks.df <- as(breaks, 'data.frame')
+    breaksSummary <- breaks.df[,c('seqnames','start','end','genoT')]
+    return(breaksSummary)
+  } else {
+    return(NULL)
+  }
+}
+
 #========================
 ### General variables ###
 #========================
-conf <- NULL
+config <- NULL
 if (is.character(configfile)) {
     ## Read config file ##
     errstring <- tryCatch({
-        conf <- readConfig(configfile)
+        config <- readConfig(configfile)
         errstring <- ''
     }, error = function(err) {
         errstring <- paste0("Could not read configuration file ",configfile)
@@ -69,21 +89,21 @@ if (!is.null(maskRegions)) {
 }
 
 ## Put options into list and merge with conf
-params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, remove.duplicate.reads=remove.duplicate.reads, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots, estimate.back=estimate.back)
-conf <- c(conf, params[setdiff(names(params),names(conf))])
+params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots)
+config <- c(config, params[setdiff(names(params),names(config))])
 
 ## Input checks
 # None at the moment
 
 ## Helpers
-windowsize <- conf[['windowsize']]
+windowsize <- config[['windowsize']]
 
 ## Set up the directory structure ##
 datapath <- file.path(outputfolder,'data')
 browserpath <- file.path(outputfolder,'browserfiles')
 
 ## Delete old directory if desired ##
-if (conf[['reuse.existing.files']]==FALSE) {
+if (config[['reuse.existing.files']]==FALSE) {
     if (file.exists(outputfolder)) {
         message("Deleting old directory ",outputfolder)
         unlink(outputfolder, recursive=TRUE)
@@ -94,39 +114,42 @@ if (!file.exists(outputfolder)) {
 }
 if (!file.exists(datapath)) { dir.create(datapath) }
 if (!file.exists(browserpath)) { dir.create(browserpath) }
-## Make a copy of the conf file
-writeConfig(conf, configfile=file.path(outputfolder, 'breakpointR.config'))
+## Make a copy of the config file
+writeConfig(config, configfile=file.path(outputfolder, 'breakpointR.config'))
 
 
 #=====================================
 # Find breakpoints and write BED files
 #=====================================
 files <- list.files(inputfolder, full.names=TRUE, recursive=FALSE, pattern='.bam$')
+summaryBreaks <- list()
 
 ### Binning ###
 if (createCompositeFile) {
-    conf[['numCPU']] <- 1 #always use only one CPU for composite file analysis
+    config[['numCPU']] <- 1 #always use only one CPU for composite file analysis
     savename <- file.path(datapath, paste0('compositeFile', '.RData'))
-    fragments <- createCompositeFile(file.list=files, chromosomes=conf[['chromosomes']], pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], WC.cutoff=conf[['WC.cutoff']])    
+    fragments <- createCompositeFile(file.list=files, chromosomes=config[['chromosomes']], pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], WC.cutoff=config[['WC.cutoff']], background=config[['background']])    
     ## Find breakpoints
     if (!file.exists(savename)) {  
-        breakpoints <- runBreakpointr(bamfile=fragments, ID='compositeFile', pairedEndReads=conf[['pairedEndReads']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']], estimate.back=conf[['estimate.back']])
+        breakpoints <- runBreakpointr(bamfile=fragments, ID='compositeFile', pairedEndReads=config[['pairedEndReads']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']])
         save(breakpoints, file=savename)
+        summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
     } else {
         breakpoints <- get(load(savename))
+        summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
     }
   
     ## Write BED file
     savename.breakpoints <- file.path(browserpath, paste0('compositeFile', '_breakPoints.bed.gz'))
     if (!file.exists(savename.breakpoints)) {
-        writeBedFile(index='compositeFile', outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
+        writeBedFile(index='compositeFile', outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
     }  
   
 
 } else if (numCPU > 1) {
     ## Parallelization ##
-    message("Using ",conf[['numCPU']]," CPUs")
-    cl <- parallel::makeCluster(conf[['numCPU']])
+    message("Using ",config[['numCPU']]," CPUs")
+    cl <- parallel::makeCluster(config[['numCPU']])
     doParallel::registerDoParallel(cl)
   
     message("Finding breakpoints ...", appendLF=FALSE); ptm <- proc.time()
@@ -135,19 +158,21 @@ if (createCompositeFile) {
         ## Find breakpoints
         if (!file.exists(savename)) {
             tC <- tryCatch({
-                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']], estimate.back=conf[['estimate.back']])
+                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']])
             }, error = function(err) {
                 stop(file,'\n',err)
             })
             save(breakpoints, file=savename)
+            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
       
         } else {
             breakpoints <- get(load(savename))
+            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         }
         ## Write BED file
         savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
         if (!file.exists(savename.breakpoints)) {
-            writeBedFile(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
+            writeBedFile(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
         }
     
     }
@@ -155,24 +180,31 @@ if (createCompositeFile) {
     time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
 
 } else {
-    conf[['numCPU']] <- 1 #if to use only one CPU or CPU argument not defined
+    config[['numCPU']] <- 1 #if to use only one CPU or CPU argument not defined
     temp <- foreach (file = files, .packages=c('breakpointR')) %do% {
         savename <- file.path(datapath,paste0(basename(file),'.RData'))
         ## Find breakpoints
         if (!file.exists(savename)) {
-            breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=conf[['pairedEndReads']], pair2frgm=conf[['pair2frgm']], min.mapq=conf[['min.mapq']], chromosomes=conf[['chromosomes']], windowsize=conf[['windowsize']], binMethod=conf[['binMethod']], trim=conf[['trim']], peakTh=conf[['peakTh']], zlim=conf[['zlim']], bg=conf[['bg']], minReads=conf[['minReads']], maskRegions=conf[['maskRegions']], estimate.back=conf[['estimate.back']])
+            breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']])
             save(breakpoints, file=savename)
+            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         } else {
             breakpoints <- get(load(savename))
+            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         }
         ## Write BED file
         savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
         if (!file.exists(savename.breakpoints)) {
-            writeBedFile(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
+            writeBedFile(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
         }
     
     }
 }
+
+## Write all breakpoints to a file
+summaryBreaks.df <- do.call(rbind, summaryBreaks)
+summaryBreaks.df$filenames <- rownames(summaryBreaks.df)
+write.table(summaryBreaks.df, file = file.path(outputfolder, 'breakPointSummary.txt'), quote = FALSE, row.names = FALSE)
 
 ## Write masked regions to BED file
 if (!is.null(maskRegions)) {
@@ -184,30 +216,51 @@ if (createCompositeFile==FALSE) {
     files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
   
     breaks.all.files <- GenomicRanges::GRangesList()
+    breaksConfInt.all.files <- GenomicRanges::GRangesList()
     for (file in files) {
-        breakpoints <- get(load(file))$breaks
+        data <- get(load(file))[c('breaks', 'confint')]
+        breakpoints <- data$breaks
+        breaks.confint <- data$confint
         if (length(breakpoints)) {
             suppressWarnings( breaks.all.files[[file]] <- breakpoints ) #TODO check if this can be done without warnings
+        }  
+        if (length(breaks.confint)) {
+          suppressWarnings( breaksConfInt.all.files[[file]] <- breaks.confint ) 
         }  
     }
     
     breaks <- unlist(breaks.all.files, use.names=FALSE)
-    ranges <- disjoin(breaks) # redefine ranges in df
-    hits <- countOverlaps(ranges, breaks) # counts number of breaks overlapping at each range
-    mcols(ranges)$hits <- hits # appends hits as a metacolumn in ranges
+    ranges.br <- disjoin(breaks) # redefine ranges in df
+    hits <- countOverlaps(ranges.br, breaks) # counts number of breaks overlapping at each range
+    mcols(ranges.br)$hits <- hits # appends hits as a metacolumn in ranges
+    
+    breaks.CI <- unlist(breaksConfInt.all.files, use.names=FALSE)
+    ranges.CI <- disjoin(breaks.CI) # redefine ranges in df
+    hits <- countOverlaps(ranges.CI, breaks) # counts number of breaks overlapping at each range
+    mcols(ranges.CI)$hits <- hits # appends hits as a metacolumn in ranges
   
     ## write a bedgraph of data (overlapping breaks)
-    writeBedFile(index='BreakpointSummary', outputDirectory=browserpath, breaksGraph=ranges)
+    writeBedFile(index='BreakpointSummary', outputDirectory=browserpath, breaksGraph=ranges.br)
+    writeBedFile(index='BreakpointConfIntSummary', outputDirectory=browserpath, breaksGraph=ranges.CI)
 }
 
 ## Search for SCE hotspots
 if (callHotSpots) {
-    hotspots <- hotspotter(gr.list=breaks.all.files, bw = 1000000)
-    savename <- file.path(datapath,'SCE_HotSpots.RData')
+    hotspots <- hotspotter(gr.list=breaks.all.files, bw = 1000000, pval = 1e-10)
     if (length(hotspots)) {
-        save(hotspots, file=savename)
         writeBedFile(index='HotSpots', outputDirectory=browserpath, hotspots=hotspots)
     }
 }
+
+## Plotting
+if (createCompositeFile==FALSE) {
+  files2plot <- list.files(datapath, pattern = ".RData", full.names = TRUE)
+  plotBreakpoints(files2plot=files2plot, file=file.path(outputfolder, 'breaksPlot.pdf'))
+  if (callHotSpots) {
+    plotHeatmap(files2plot=files2plot, file=file.path(outputfolder, 'breaksHeatmapPlot.pdf'), hotspots=hotspots)
+  } else {
+    plotHeatmap(files2plot=files2plot, file=file.path(outputfolder, 'breaksHeatmapPlot.pdf'))
+  }  
+}  
 
 }

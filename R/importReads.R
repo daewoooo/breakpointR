@@ -13,6 +13,11 @@
 #' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
 #' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
+#' @examples
+#'filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+#'file <- list.files(filepath, full.names=TRUE)[1] 
+#'gr <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+#'
 readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEndReads=FALSE, min.mapq=10, remove.duplicate.reads=FALSE, pair2frgm=FALSE) {
 
   ## Check if bamindex exists
@@ -124,7 +129,8 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
       #data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
       #strand(data.last) <- strand(data.first)
       #data <- sort(c(data.first, data.last))
-      data <- as(GenomicAlignments::first(data.raw), 'GRanges') #use only first mate of the read pair in subsequent analysis!!!
+      data.prop.pairs <- data.raw[GenomicAlignments::isProperPair(data.raw)]	
+      data <- as(GenomicAlignments::first(data.prop.pairs), 'GRanges') #use only first mate of the read pair in subsequent analysis!!!
 
       ## Filter by mapping quality
       if (!is.null(min.mapq)) {

@@ -9,7 +9,13 @@
 #' @importFrom BiocGenerics as.vector
 #' @author Aaron Taudt
 #' @seealso readBamFileAsGRanges
-deltaWCalculator <- function(frags, reads.per.window=10) {
+#' @examples 
+#'filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+#'file <- list.files(filepath, full.names=TRUE)[1] 
+#'fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+#'dw <- deltaWCalculator(fragments)
+#' 
+deltaWCalculator <- function(frags, reads.per.window=100) {
 
   if (reads.per.window == 0) {
     stop("'reads.per.window' must be >= 1")

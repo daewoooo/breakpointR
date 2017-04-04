@@ -4,7 +4,7 @@
 \alias{deltaWCalculator}
 \title{Calculate deltaWs}
 \usage{
-deltaWCalculator(frags, reads.per.window = 10)
+deltaWCalculator(frags, reads.per.window = 100)
 }
 \arguments{
 \item{frags}{A \code{\link[GenomicRanges]{GRanges}} with read fragments (see \code{\link{readBamFileAsGRanges}}).}
@@ -16,6 +16,13 @@ The input \code{frags} with additional meta-data columns.
 }
 \description{
 This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+}
+\examples{
+filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+file <- list.files(filepath, full.names=TRUE)[1] 
+fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+dw <- deltaWCalculator(fragments)
+
 }
 \author{
 Aaron Taudt

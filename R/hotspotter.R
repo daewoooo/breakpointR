@@ -19,12 +19,12 @@
 #'## Get hotspot coordinates
 #'hotspots <- hotspotter(breaks, bw=1e6)
 #'
-hotspotter <- function(gr.list, bw=1000000, pval=1e-10) {
+hotspotter <- function(gr.list, bw, pval=1e-8) {
 
   ## Coerce into one GRanges
   names(gr.list) <- NULL
   #gr <- do.call(c,gr.list)
-  gr <- unlist(gr.list)
+  gr <- unlist(gr.list)	
   gr <- sort(gr)
   
   ## Iterate over chromosomes and calculate p-values
@@ -77,5 +77,3 @@ hotspotter <- function(gr.list, bw=1000000, pval=1e-10) {
   return(pranges)
 
 }
-
-

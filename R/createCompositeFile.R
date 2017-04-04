@@ -7,7 +7,7 @@
 #' @param file.list TODO:DAVID
 #' @inheritParams readBamFileAsGRanges
 #' @param WC.cutoff Percentage of WW or CC reads to consider chromosome being WW or CC
-#' @param bg The amount of background introduced into the genotype test.
+#' @param background The amount of background introduced into the genotype test.
 #' @return TODO:DAVID
 #' @importFrom gtools mixedsort
 #' @importFrom BiocGenerics table
@@ -22,7 +22,7 @@
 #'composite <- createCompositeFile(files, chromosomes=paste0('chr', c(1:22, 'X')),
 #'                    pairedEndReads=FALSE)
 #'                    
-createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE, pair2frgm=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, WC.cutoff=0.90, bg=0.02) {
+createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE, pair2frgm=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, WC.cutoff=0.90, background=0.02) {
 
     message("Creating composite file from ", length(file.list), " bam files")
 
@@ -54,7 +54,7 @@ createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE
             # }
             
             ## Alternatively use Fisher's test to genotype
-            geno <- genotype.fisher(cReads=plus.count, wReads=minus.count, roiReads=plus.count+minus.count, backG=bg, minReads = 10)
+            geno <- genotype.fisher(cReads=plus.count, wReads=minus.count, roiReads=plus.count+minus.count, background=background, minReads = 10)
             ## check if this is a pure (WW or CC) library
             if (geno$bestFit == 'ww' | geno$bestFit == 'cc') {
                 ## if this is pure WW, reverse compliment all the reads
@@ -72,7 +72,7 @@ createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE
     composite.data <- unlist(composite.bam.grl)
     names(composite.data) <- NULL
     seqlevels(composite.data) <- gtools::mixedsort( as.character(unique(seqnames(composite.data))) )
-    composite.data <- sort(composite.data)
+    composite.data <- GenomicRanges::sort(composite.data, ignore.strand=TRUE)
     return(composite.data)
 }
 

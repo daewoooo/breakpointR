@@ -4,14 +4,14 @@
 \alias{GenotypeBreaks}
 \title{Genotype the space between breakpoints}
 \usage{
-GenotypeBreaks(breaks, fragments, backG = 0.02, minReads = 10)
+GenotypeBreaks(breaks, fragments, background = 0.02, minReads = 10)
 }
 \arguments{
 \item{breaks}{A \code{\link[GenomicRanges]{GRanges}} object with breakpoint coordinates.}
 
 \item{fragments}{A \code{\link[GenomicRanges]{GRanges}} object with read fragments.}
 
-\item{backG}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
+\item{background}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
 
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 }
@@ -20,6 +20,15 @@ A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordina
 }
 \description{
 Genotype the space between breakpoints with Fisher's exact test.
+}
+\examples{
+filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+file <- list.files(filepath, full.names=TRUE)[1] 
+fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+dw <- deltaWCalculator(fragments)
+breaks <- breakSeekr(dw)
+gbreaks <- GenotypeBreaks(breaks, fragments)
+
 }
 \author{
 Ashley Sanders, David Porubsky, Aaron Taudt

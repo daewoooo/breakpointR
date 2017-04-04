@@ -4,12 +4,12 @@
 \alias{plotHeatmap}
 \title{Genome wide heatmap of template inheritance states}
 \usage{
-plotHeatmap(breakpoints, file = NULL)
+plotHeatmap(files2plot, file = NULL, hotspots = NULL)
 }
 \arguments{
-\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
-
 \item{file}{Name of the file to plot to.}
+
+\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot}} object of \code{NULL}, depending on option \code{file}.

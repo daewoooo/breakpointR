@@ -29,6 +29,12 @@ A \code{\link[GenomicRanges]{GRanges}}.
 \description{
 Import aligned reads from a BAM file into a \code{\link[GenomicRanges]{GRanges}} object.
 }
+\examples{
+filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+file <- list.files(filepath, full.names=TRUE)[1] 
+gr <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+
+}
 \author{
 Aaron Taudt, David Porubsky, Ashley Sanders
 }

@@ -16,12 +16,10 @@
 #' @param windowsize The window size used to calculate deltaWs, either number of reads or genomic size depending on binMethod
 #' @inheritParams readBamFileAsGRanges
 #' @param binMethod Method used to calculate optimal number of reads in the window ("size", "reads"). Default = "size"
-#' @param trim The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).
-#' @param peakTh The treshold that the peak deltaWs must pass to be considered a breakpoint.
-#' @param zlim The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).
-#' @param bg The amount of background introduced into the genotype test.
-#' @param minReads The minimum number of reads required for genotyping.
+#' @inheritParams breakSeekr
+#' @inheritParams GenotypeBreaks
 #' @param maskRegions List of regions to be excluded from the analysis (format: chromosomes start end)
+#' @inheritParams confidenceInterval
 #' @return A \code{\link{BreakPoint}} object.
 #' @author Ashley Sanders, David Porubsky, Aaron Taudt
 #' @importFrom utils flush.console
@@ -34,7 +32,7 @@
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE)
 #'
-runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, bg=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL, estimate.back=FALSE) {
+runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
     if ( class(bamfile) != "GRanges" ) {
@@ -61,9 +59,10 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     #seqlevels(deltas.all.chroms) <- seqlevels(fragments)
     breaks.all.chroms <- GenomicRanges::GRangesList()
     #seqlevels(breaks.all.chroms) <- seqlevels(fragments)
+    confint.all.chroms <- GenomicRanges::GRangesList()
+    #seqlevels(confint.all.chroms) <- seqlevels(fragments)
     counts.all.chroms <- GenomicRanges::GRangesList()
     #seqlevels(counts.all.chroms) <- seqlevels(fragments)
-  
     for (chr in unique(seqnames(fragments))) {
         message("  Working on chromosome ",chr)
         fragments.chr <- fragments[seqnames(fragments)==chr]
@@ -101,7 +100,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             iter <- 1
             ptm <- startTimedMessage("    genotyping ",iter, " ...")
             utils::flush.console()
-            newBreaks <- GenotypeBreaks(breaks, fragments, backG=bg, minReads=minReads)
+            newBreaks <- GenotypeBreaks(breaks, fragments, background=background, minReads=minReads)
             prev.breaks <- breaks  
             breaks <- newBreaks
             stopTimedMessage(ptm)
@@ -110,14 +109,16 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
                 utils::flush.console()
                 iter <- iter + 1
                 ptm <- startTimedMessage("    genotyping ",iter, " ...")
-                newBreaks <- GenotypeBreaks(breaks, fragments, backG=bg, minReads=minReads)
+                newBreaks <- GenotypeBreaks(breaks, fragments, background=background, minReads=minReads)
                 prev.breaks <- breaks  
                 breaks <- newBreaks
                 stopTimedMessage(ptm)
                 if (iter == maxiter) { break }
             }
+            
         } else {
-            newBreaks<-NULL # assigns something to newBreaks if no peaks found
+            newBreaks <- NULL # assigns something to newBreaks if no peaks found
+            confint <- NULL
         }
     
         ### count reads between the breaks and write into GRanges
@@ -143,6 +144,8 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             }          
             chrRange$states <- state
             suppressWarnings( counts.all.chroms[[chr]] <- chrRange )
+            
+            confint <- NULL
       
         } else {
           
@@ -169,14 +172,28 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             mcols(breakrange) <- counts
             breakrange$states <- states
             suppressWarnings( counts.all.chroms[[chr]] <- breakrange )
+            
+            ## Confidence intervals
+            ptm <- startTimedMessage("    confidence intervals ...")
+            if (bamfile != 'CompositeFile') {
+              # confint <- confidenceInterval(breaks = newBreaks, fragments = fragments, background = background, conf = conf)
+              confint <- confidenceInterval.binomial(breaks = newBreaks, fragments = fragments, background = background, conf = conf)
+            } else {
+              # use nonbinomial test to calculate confidence intervals for composite file
+              confint <- confidenceInterval.binomial(breaks = newBreaks, fragments = fragments, background = background, conf = conf)
+            }
+            stopTimedMessage(ptm)
         }
     
         ### write breaks and deltas into GRanges
         if (length(deltaWs) > 0) {
-            suppressWarnings( deltas.all.chroms[[chr]] <- deltaWs[,'deltaW'] )  #select only deltaW metadata column to store
+            deltas.all.chroms[[chr]] <- deltaWs[,'deltaW']  #select only deltaW metadata column to store
         }
         if (length(newBreaks) > 0) {
-            suppressWarnings( breaks.all.chroms[[chr]] <- newBreaks )
+            breaks.all.chroms[[chr]] <- newBreaks
+        }
+        if (length(confint) > 0) {
+            confint.all.chroms[[chr]] <- confint
         }
         
     }
@@ -185,26 +202,35 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     reads.all.chroms <- unlist(reads.all.chroms, use.names=FALSE)  
     deltas.all.chroms <- unlist(deltas.all.chroms, use.names=FALSE)
     breaks.all.chroms <- unlist(breaks.all.chroms, use.names=FALSE)
+    confint.all.chroms <- unlist(confint.all.chroms, use.names=FALSE)
     counts.all.chroms <- unlist(counts.all.chroms, use.names=FALSE)
     
     seqlevels(deltas.all.chroms) <- seqlevels(reads.all.chroms)
     seqlevels(breaks.all.chroms) <- seqlevels(reads.all.chroms)
+    seqlevels(breaks.all.chroms) <- seqlevels(reads.all.chroms)
     seqlevels(counts.all.chroms) <- seqlevels(reads.all.chroms)
     
-    if (estimate.back) {
-      counts.all.chroms[counts.all.chroms$states == 'ww'] -> ww
-      counts.all.chroms[counts.all.chroms$states == 'cc'] -> cc
-      mean(sum(ww$Cs) / sum(ww$Ws), sum(cc$Ws) / sum(cc$Cs)) -> bg
-      #mean(sum(ww$Cs/width(ww)) / sum(ww$Ws/width(ww)), sum(cc$Ws/width(cc)) / sum(cc$Cs/width(cc))) -> bg
-      #mean( c(ww$Cs / ww$Ws , cc$Ws / cc$Cs) )-> bg
-      fisher <- sapply(1:length(counts.all.chroms), function(x) genotype.fisher(cReads=counts.all.chroms$Cs[x], wReads=counts.all.chroms$Ws[x], roiReads=counts.all.chroms$Cs[x]+counts.all.chroms$Ws[x], backG=bg, minReads=minReads))
-      counts.all.chroms$new.states <- unlist(fisher[1,])
-    }
+    ## Estimate background reads
+    counts.all.chroms[counts.all.chroms$states == 'ww'] -> ww
+    counts.all.chroms[counts.all.chroms$states == 'cc'] -> cc
+    mean(sum(ww$Cs) / sum(ww$Ws), sum(cc$Ws) / sum(cc$Cs)) -> bg.estim
     
+    ## Calculate reads per megabase
+    tiles <- unlist(tileGenome(seqlengths(fragments), tilewidth = 1000000))
+    counts <- countOverlaps(tiles, fragments)
+    reads.MB <- round(median(counts))
+    
+    ## Calculate % of the genome covered
+    red.frags <- reduce(fragments)
+    perc.cov <- ( sum(as.numeric(width(red.frags))) / sum(as.numeric(seqlengths(red.frags))) )*100
+    perc.cov <- round(perc.cov, digits = 2)
+    
+    library.metrics <- c(background.estimate=bg.estim, med.reads.per.MB=reads.MB, perc.coverage=perc.cov)
+
     ## save set parameters for future reference
-    parameters <- c(windowsize=windowsize, binMethod=binMethod, trim=trim, peakTh=peakTh, zlim=zlim, bg=bg, minReads=minReads)
+    parameters <- c(windowsize=windowsize, binMethod=binMethod, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads)
   
-    data.obj <- list(ID=ID, fragments=fragments, deltas=deltas.all.chroms, breaks=breaks.all.chroms, counts=counts.all.chroms, params=parameters)
+    data.obj <- list(ID=ID, fragments=fragments, deltas=deltas.all.chroms, breaks=breaks.all.chroms, confint=confint.all.chroms, counts=counts.all.chroms, lib.metrics=library.metrics, params=parameters)
     class(data.obj) <- class.breakpoint
   
     return(data.obj)

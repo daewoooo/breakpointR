@@ -4,71 +4,73 @@
 #'
 #' @param breaks A \code{\link[GenomicRanges]{GRanges}} object with breakpoint coordinates.
 #' @param fragments A \code{\link[GenomicRanges]{GRanges}} object with read fragments.
-#' @param backG The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.
+#' @param background The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.
 #' @param minReads The minimal number of reads between two breaks required for genotyping.
 #' @return A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordinates.
 #' @author Ashley Sanders, David Porubsky, Aaron Taudt
 #' @importFrom stats fisher.test
-GenotypeBreaks <- function(breaks, fragments, backG=0.02, minReads=10)
+#' @examples 
+#' filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+#' file <- list.files(filepath, full.names=TRUE)[1] 
+#' fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+#' dw <- deltaWCalculator(fragments)
+#' breaks <- breakSeekr(dw)
+#' gbreaks <- GenotypeBreaks(breaks, fragments)
+#'
+GenotypeBreaks <- function(breaks, fragments, background=0.02, minReads=10)
 {
     if (length(breaks)==0) {
         stop("argument 'breaks' is empty")
     }
-    if (length(unique(as.character(seqnames(breaks))))>1) {
-        stop("argument 'breaks' must contain only coordinates for one chromosome")
+  
+    breakrange.list <- GenomicRanges::GRangesList()
+    seqlevels(breakrange.list) <- seqlevels(breaks)
+    for (chrom in unique(seqnames(breaks))) {
+          
+        # create ranges between the breakpoints -> start and stops in a dataframe, use this to genotype between
+        breaks.strand <- breaks[seqnames(breaks) == chrom]
+        strand(breaks.strand) <- '*'
+        # Remove the non-used seqlevels
+        breaks.strand <- keepSeqlevels(breaks.strand, value=chrom)
+        breakrange <- gaps(breaks.strand)
+        breakrange <- breakrange[strand(breakrange)=='*']
+        
+        ## pull out reads of each line, and genotype in the fragments
+        strand(breakrange) <- '-'
+        breakrange$Ws <- GenomicRanges::countOverlaps(breakrange, fragments)
+        strand(breakrange) <- '+'
+        breakrange$Cs <- GenomicRanges::countOverlaps(breakrange, fragments)
+        strand(breakrange) <- '*'
+        breakrange$readNo <- breakrange$Ws + breakrange$Cs
+        
+        ## bestFit genotype each region by Fisher Exact test
+        fisher <- sapply(1:length(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], background=background, minReads=minReads))
+      
+        breakrange$genoT <- unlist(fisher[1,])
+        breakrange$pVal <- unlist(fisher[2,])
+        breakrange <- breakrange[!is.na(breakrange$genoT)]
+      
+        ## remove break if genotype is the same on either side of it
+        equal.on.either.side <- c(breakrange$genoT[-length(breakrange)] == breakrange$genoT[-1], TRUE)
+        breakrange.new <- breakrange[!equal.on.either.side]
+        start(breakrange.new) <- end(breakrange[!equal.on.either.side])
+        end(breakrange.new) <- start(breakrange[which(!equal.on.either.side)+1])
+        breakrange.new$genoT <- paste(breakrange$genoT[!equal.on.either.side], breakrange$genoT[which(!equal.on.either.side)+1], sep='-')
+      
+        mcols(breakrange.new)[c('Ws','Cs','readNo','pVal')] <- NULL
+  
+        breakrange.list[[chrom]] <- breakrange.new
+        
     }
-    # Remove the non-used seqlevels
-    breaks <- keepSeqlevels(breaks, value=as.character(unique(seqnames(breaks))))
-  
-    # create ranges between the breakpoints -> start and stops in a dataframe, use this to genotype between
-    breaks.strand <- breaks
-    strand(breaks.strand) <- '*'
-    breakrange <- gaps(breaks.strand)
-    breakrange <- breakrange[strand(breakrange)=='*']
-    
-    ## pull out reads of each line, and genotype in the fragments
-    strand(breakrange) <- '-'
-    breakrange$Ws <- GenomicRanges::countOverlaps(breakrange, fragments)
-    strand(breakrange) <- '+'
-    breakrange$Cs <- GenomicRanges::countOverlaps(breakrange, fragments)
-    strand(breakrange) <- '*'
-    breakrange$readNo <- breakrange$Ws + breakrange$Cs
-    
-    ## bestFit genotype each region by Fisher Exact test
-    fisher <- sapply(1:length(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], backG=backG, minReads=minReads))
-  
-    breakrange$genoT <- unlist(fisher[1,])
-    breakrange$pVal <- unlist(fisher[2,])
-    breakrange <- breakrange[!is.na(breakrange$genoT)]
-    
-    #genoTs <- cbind(breakrange$genoT[-length(breakrange)], breakrange$genoT[-1])
-    #mask <- which(apply(genoTs, 1, function(x) all(is.na(x))))
-    #breaks.strand <- breaks.strand[-mask]
-    #breaks.strand$genoT <- genoTs[-mask,]
-    
-    ## remove break if genotype is the same on either side of it
-    equal.on.either.side <- c(breakrange$genoT[-length(breakrange)] == breakrange$genoT[-1], TRUE)
-    breakrange.new <- breakrange[!equal.on.either.side]
-    start(breakrange.new) <- end(breakrange[!equal.on.either.side])
-    end(breakrange.new) <- start(breakrange[which(!equal.on.either.side)+1])
-    breakrange.new$genoT <- paste(breakrange$genoT[!equal.on.either.side], breakrange$genoT[which(!equal.on.either.side)+1], sep='-')
-  
-    ## Refine breakpoint regions to the highest deltaW in the given region
-#    if (length(breakrange.new)) {  
-#      hits <- findOverlaps(breakrange.new, breaks)
-#      ToRefine <- split(breaks[subjectHits(hits)], queryHits(hits))
-#      refined <- unlist(endoapply(ToRefine, RefineBreaks), use.names = F)
-#      ranges(breakrange.new) <- ranges(refined)
-#      breakrange.new$deltaW <- refined$deltaW
-#    }  
+    breakrange.new <- unlist(breakrange.list, use.names=FALSE)
     
     if (length(breakrange.new)) {
-        ## Refine breakpoint regions to the highest deltaW in the given region
+	## Refine breakpoint regions to the highest deltaW in the given region
         hits <- GenomicRanges::findOverlaps(breakrange.new, breaks)
         ToRefine <- split(breaks[subjectHits(hits)], queryHits(hits))
         refined <- unlist(endoapply(ToRefine, RefineBreaks), use.names = F)
         ranges(breakrange.new) <- ranges(refined)
-        breakrange.new$deltaW <- refined$deltaW
+        breakrange.new$deltaW <- refined$deltaW	  
         return(breakrange.new)
     } else {
         return(breakrange.new<-NULL)
@@ -84,11 +86,11 @@ GenotypeBreaks <- function(breaks, fragments, backG=0.02, minReads=10)
 #' @param cReads Number of Crick reads.
 #' @param wReads Number of Watson reads.
 #' @param roiReads Total number of reads.
-#' @param backG Parameter for frequency of background reads.
+#' @param background Parameter for frequency of background reads.
 #' @param minReads Minimal number of reads to perform the test.
 #' @return A list with the $bestFit and $pval.
 #' @author Ashley Sanders, David Porubsky, Aaron Taudt
-genotype.fisher <- function(cReads, wReads, roiReads, backG=0.02, minReads=10)
+genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=10)
 {  ## FISHER EXACT TEST
     result <- list(bestFit=NA, pval=NA)
     if (length(roiReads)==0) {
@@ -98,40 +100,18 @@ genotype.fisher <- function(cReads, wReads, roiReads, backG=0.02, minReads=10)
         return(result)
     }
     if ( roiReads >= minReads ) {
-        m <- matrix(c(cReads, wReads, round(roiReads*(1-backG)), ceiling(roiReads*backG)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
+        m <- matrix(c(cReads, wReads, round(roiReads*(1-background)), round(roiReads*background)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
         CCpVal <- stats::fisher.test(m, alternative="greater")[[1]]
-        m <- matrix(c(cReads, wReads, round(roiReads*0.5), ceiling(roiReads*0.5)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
+        m <- matrix(c(cReads, wReads, round(roiReads*0.5), round(roiReads*0.5)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
         WCpVal <- 1 - stats::fisher.test(m, alternative="two.sided")[[1]]
-        m <- matrix(c(wReads, cReads, round(roiReads*(1-backG)), ceiling(roiReads*backG)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Ws','Cs')))
+        m <- matrix(c(wReads, cReads, round(roiReads*(1-background)), round(roiReads*background)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Ws','Cs')))
         WWpVal <- stats::fisher.test(m, alternative="greater")[[1]]
-        
-        maxiter <- 5
-        iter <- 0
-        while (CCpVal == WCpVal & WCpVal == WWpVal) { #if pVals are equal, take 10% of reads and recalculate
-            iter <- iter + 1
-            cReads <-cReads*0.1
-            wReads <- wReads*0.1
-            roiReads <-roiReads*0.1
-            m <- matrix(c(cReads, wReads, round(roiReads*(1-backG)), ceiling(roiReads*backG)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
-            CCpVal <- stats::fisher.test(m, alternative="greater")[[1]]
-            m <- matrix(c(cReads, wReads, round(roiReads*0.5), ceiling(roiReads*0.5)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Cs','Ws')))
-            WCpVal <- 1 - stats::fisher.test(m, alternative="two.sided")[[1]]
-            m <- matrix(c(wReads, cReads, round(roiReads*(1-backG)), ceiling(roiReads*backG)), ncol=2, byrow=TRUE, dimnames=list(case=c('real', 'reference'), reads=c('Ws','Cs')))
-            WWpVal <- stats::fisher.test(m, alternative="greater")[[1]]
-            if (iter == maxiter) { break }
-        }
         
         pVal <- c(wc=WCpVal, cc=CCpVal, ww=WWpVal)
         result <- list(bestFit=names(pVal)[which.min(pVal)], pval=min(pVal))
-        
-        if (CCpVal == WCpVal & WCpVal == WWpVal) { 
-          result$bestFit <- "?"
-        }  
-          
         return(result)
         
     } else { 
-      
         return(result)
     }
 }  
@@ -154,7 +134,6 @@ mergeGR <- function(gr) {
   new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=min(start(gr)), end=max(end(gr))))
   return(new.gr)
 }
-
 
 ############################ old fisher
 

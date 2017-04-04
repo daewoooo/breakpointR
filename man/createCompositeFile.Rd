@@ -6,7 +6,7 @@
 \usage{
 createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
   pair2frgm = FALSE, min.mapq = 10, remove.duplicate.reads = TRUE,
-  WC.cutoff = 0.9, bg = 0.02)
+  WC.cutoff = 0.9, background = 0.02)
 }
 \arguments{
 \item{file.list}{TODO:DAVID}
@@ -23,7 +23,7 @@ createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
 
 \item{WC.cutoff}{Percentage of WW or CC reads to consider chromosome being WW or CC}
 
-\item{bg}{The amount of background introduced into the genotype test.}
+\item{background}{The amount of background introduced into the genotype test.}
 }
 \value{
 TODO:DAVID
