@@ -8,8 +8,8 @@ breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
   reuse.existing.files = FALSE, windowsize = 1e+06, binMethod = "size",
   pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
   min.mapq = 10, trim = 10, peakTh = 0.33, zlim = 3.291,
-  background = 0.02, minReads = 10, createCompositeFile = FALSE,
-  WC.cutoff = 0.9, maskRegions = NULL, callHotSpots = FALSE)
+  background = 0.02, minReads = 10, maskRegions = NULL,
+  callHotSpots = FALSE)
 }
 \arguments{
 \item{inputfolder}{Folder with BAM files.}
@@ -34,15 +34,9 @@ breakpointer(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
-\item{background}{The amount of background introduced into the genotype test.}
-
-\item{createCompositeFile}{Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)}
-
-\item{WC.cutoff}{Percentage of WW or CC reads to consider chromosome being WW or CC}
-
 \item{maskRegions}{List of regions to be excluded from the analysis (format: chromosomes start end)}
 
-\item{callHotSpots}{Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)}
+\item{callHotSpots}{Search for regions of high abundance of breakpoints in single cells}
 }
 \value{
 \code{NULL}

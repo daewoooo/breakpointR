@@ -7,13 +7,11 @@
 #' @param configfile A file specifying the parameters of this function (without \code{inputfolder}, \code{outputfolder} and \code{configfile}). Having the parameters in a file can be handy if many samples with the same parameter settings are to be run. If a \code{configfile} is specified, it will take priority over the command line parameters.
 #' @param numCPU The numbers of CPUs that are used. Should not be more than available on your machine.
 #' @param reuse.existing.files A logical indicating whether or not existing files in \code{outputfolder} should be reused.
-#' @param createCompositeFile Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)
-#' @param callHotSpots Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)
+#' @param callHotSpots Search for regions of high abundance of breakpoints in single cells
 
 #' @inheritParams readBamFileAsGRanges
 #' @inheritParams runBreakpointr
 #' @inheritParams readBamFileAsGRanges
-#' @inheritParams createCompositeFile
 
 #' @return \code{NULL}
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
@@ -30,7 +28,7 @@
 #'breakpointer(inputfolder, outputfolder, chromosomes=paste0("chr", c(1:22, "X")),
 #'             pairedEndReads=FALSE)
 #'
-breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, background=0.02, minReads=10, createCompositeFile=FALSE, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE) {
+breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, background=0.02, minReads=10, maskRegions=NULL, callHotSpots=FALSE) {
 
 #=======================
 ### Helper functions ###
@@ -89,7 +87,7 @@ if (!is.null(maskRegions)) {
 }
 
 ## Put options into list and merge with conf
-params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots)
+params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes, min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads, maskRegions=maskRegions, callHotSpots=callHotSpots)
 config <- c(config, params[setdiff(names(params),names(config))])
 
 ## Input checks
