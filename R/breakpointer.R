@@ -30,6 +30,8 @@
 #'
 breakpointer <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, background=0.02, minReads=10, maskRegions=NULL, callHotSpots=FALSE) {
 
+createCompositeFile <- FALSE    
+    
 #=======================
 ### Helper functions ###
 #=======================
