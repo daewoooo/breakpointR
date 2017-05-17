@@ -68,8 +68,8 @@ writeConfig <- function(conf, configfile) {
   for (i1 in c('numCPU','reuse.existing.files')) {
     cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
   }
-  cat("\n[breakpoints]\n", file=f)
-  for (i1 in c('windowsize', 'scaleWindowSize', 'pairedEndReads', 'chromosomes', 'remove.duplicate.reads', 'min.mapq', 'trim', 'peakTh', 'zlim', 'bg', 'minReads', 'WC.cutoff')) {
+  cat("\n[BreakPointR]\n", file=f)
+  for (i1 in c('windowsize', 'binMethod', 'pairedEndReads', 'pair2frgm', 'chromosomes', 'min.mapq', 'trim', 'peakTh', 'zlim', 'background', 'minReads', 'maskRegions', 'callHotSpots')) {
     cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
   }
   close(f, type='w')

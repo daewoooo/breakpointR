@@ -122,7 +122,7 @@ writeConfig(config, configfile=file.path(outputfolder, 'breakpointR.config'))
 # Find breakpoints and write BED files
 #=====================================
 files <- list.files(inputfolder, full.names=TRUE, recursive=FALSE, pattern='.bam$')
-summaryBreaks <- list()
+#summaryBreaks <- list()
 
 ### Binning ###
 if (createCompositeFile) {
@@ -133,10 +133,10 @@ if (createCompositeFile) {
     if (!file.exists(savename)) {  
         breakpoints <- runBreakpointr(bamfile=fragments, ID='compositeFile', pairedEndReads=config[['pairedEndReads']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']])
         save(breakpoints, file=savename)
-        summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
+        #summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
     } else {
         breakpoints <- get(load(savename))
-        summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
+        #summaryBreaks[['compositeFile']] <- summarizeBreaks(breakpoints)
     }
   
     ## Write BED file
@@ -163,11 +163,11 @@ if (createCompositeFile) {
                 stop(file,'\n',err)
             })
             save(breakpoints, file=savename)
-            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
+            #summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
       
         } else {
             breakpoints <- get(load(savename))
-            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
+            #summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         }
         ## Write BED file
         savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
@@ -187,10 +187,10 @@ if (createCompositeFile) {
         if (!file.exists(savename)) {
             breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']])
             save(breakpoints, file=savename)
-            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
+            #summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         } else {
             breakpoints <- get(load(savename))
-            summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
+            #summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints)
         }
         ## Write BED file
         savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
@@ -202,9 +202,9 @@ if (createCompositeFile) {
 }
 
 ## Write all breakpoints to a file
-summaryBreaks.df <- do.call(rbind, summaryBreaks)
-summaryBreaks.df$filenames <- rownames(summaryBreaks.df)
-write.table(summaryBreaks.df, file = file.path(outputfolder, 'breakPointSummary.txt'), quote = FALSE, row.names = FALSE)
+#summaryBreaks.df <- do.call(rbind, summaryBreaks)
+#summaryBreaks.df$filenames <- rownames(summaryBreaks.df)
+#write.table(summaryBreaks.df, file = file.path(outputfolder, 'breakPointSummary.txt'), quote = FALSE, row.names = FALSE)
 
 ## Write masked regions to BED file
 if (!is.null(maskRegions)) {
@@ -217,8 +217,10 @@ if (createCompositeFile==FALSE) {
   
     breaks.all.files <- GenomicRanges::GRangesList()
     breaksConfInt.all.files <- GenomicRanges::GRangesList()
+    summaryBreaks <- list()
     for (file in files) {
         data <- get(load(file))[c('breaks', 'confint')]
+        summaryBreaks[[basename(file)]] <- summarizeBreaks(data)
         breakpoints <- data$breaks
         breaks.confint <- data$confint
         if (length(breakpoints)) {
@@ -242,7 +244,20 @@ if (createCompositeFile==FALSE) {
     ## write a bedgraph of data (overlapping breaks)
     writeBedFile(index='BreakpointSummary', outputDirectory=browserpath, breaksGraph=ranges.br)
     writeBedFile(index='BreakpointConfIntSummary', outputDirectory=browserpath, breaksGraph=ranges.CI)
+} else {
+  files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
+  
+  summaryBreaks <- list()
+  for (file in files) {
+    data <- get(load(file))[c('breaks', 'confint')]
+    summaryBreaks[[basename(file)]] <- summarizeBreaks(data)
+  }
 }
+
+## Write all breakpoints to a file
+summaryBreaks.df <- do.call(rbind, summaryBreaks)
+summaryBreaks.df$filenames <- rownames(summaryBreaks.df)
+write.table(summaryBreaks.df, file = file.path(outputfolder, 'breakPointSummary.txt'), quote = FALSE, row.names = FALSE)
 
 ## Search for SCE hotspots
 if (callHotSpots) {
