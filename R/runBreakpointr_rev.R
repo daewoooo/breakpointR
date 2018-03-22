@@ -32,7 +32,7 @@
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE)
 #'
-runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
+runBreakpointr_rev <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.02, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
     if ( class(bamfile) != "GRanges" ) {
