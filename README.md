@@ -3,7 +3,7 @@
 
 An R-package for breakpoint detection in single cell Strand-seq data.
 
-Collaborators: Ashley D Sanders, David Porubsky, Aaron Taudt
+Collaborators: David Porubsky, Ashley D Sanders, Aaron Taudt
 
 Installation
 ------------
@@ -31,6 +31,10 @@ How to use BreakPointR
 ----------------------
 
 Please refert to the [vignette](https://github.com/daewoooo/BreakPointR/blob/master/vignettes/breakpointR.pdf) for tutorials on all breakpointR features.
+
+NOTE
+-----
+The BreakPointR package is currently under development and contains unpublished work. Any usage for publishing is strictly prohibited without permission.
 
 Report Errors
 -------------
