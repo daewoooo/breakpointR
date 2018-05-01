@@ -22,12 +22,12 @@ To install the development version from Github, follow the steps given below. Th
 	 source("http://bioconductor.org/biocLite.R")  
 	 biocLite("GenomicRanges")  
 	 biocLite("GenomicAlignments")  
-	 library(devtools)
-	 install_github("daewoooo/strandseqExampleData") 
+	 library(devtools)  
+	 install_github("daewoooo/strandseqExampleData")  
 	 install_github("daewoooo/BreakPointR")  
-	 #### Or alternatively if the above line doesn't work:
-	 install_git("git://github.com/daewoooo/strandseqExampleData.git", branch = "master")
-	 install_git("git://github.com/daewoooo/BreakPointR.git", branch = "master")
+	 #### Or alternatively if the above line doesn't work:  
+	 install_git("git://github.com/daewoooo/strandseqExampleData.git", branch = "master")  
+	 install_git("git://github.com/daewoooo/BreakPointR.git", branch = "master")  
 
 How to use BreakPointR
 ----------------------
