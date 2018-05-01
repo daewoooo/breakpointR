@@ -14,4 +14,3 @@ length(example_BreakPoints)
 ## Have a look at the first object
 example_BreakPoints[[1]]
 }
-

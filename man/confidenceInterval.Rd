@@ -4,28 +4,39 @@
 \alias{confidenceInterval}
 \title{Estimate confidence intervals for breakpoints}
 \usage{
-confidenceInterval(breaks, fragments, background, conf = 0.99)
+confidenceInterval(breaks, fragments, background = 0.05, conf = 0.99)
 }
 \arguments{
 \item{breaks}{Genotyped breakpoints as outputted from function \code{\link{GenotypeBreaks}}.}
 
 \item{fragments}{Read fragments from function \code{\link{readBamFileAsGRanges}}.}
 
-\item{background}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
+\item{background}{The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.}
 
-\item{conf}{Desired confidence interval.}
+\item{conf}{Desired confidence interval of localized breakpoints.}
+}
+\value{
+A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 }
 \description{
 Estimate confidence intervals for breakpoints by going outwards from the breakpoint read by read, and multiplying the probability that the read doesn't belong to the assigned segment.
 }
 \examples{
-filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-file <- list.files(filepath, full.names=TRUE)[1]
-fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+## Get an example file  
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+## Calculate deltaW values
 dw <- deltaWCalculator(fragments)
+## Get significant peaks in deltaW values
 breaks <- breakSeekr(dw)
+## Genotype regions between breakpoints
 gbreaks <- GenotypeBreaks(breaks, fragments)
+## Calculate confidence intervals of genotyped breakpoints
 confint <- confidenceInterval(gbreaks, fragments, background=0.02)
 
 }
-
+\author{
+Aaron Taudt, David Porubsky
+}

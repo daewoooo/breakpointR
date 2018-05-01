@@ -18,11 +18,10 @@
 #' @export
 #' @examples 
 #'## Get an example file
-#'exampleFolder <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Run breakpointR
-#'brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE,
-#'                          chromosomes=paste0("chr", c(1:22,'X')))
+#'brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE, chromosomes='chr1')
 #'## Write results to BED files
 #'writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragments,
 #'            deltaWs=brkpts$deltas, breakTrack=brkpts$breaks,
@@ -30,130 +29,130 @@
 #'            
 writeBedFile <- function(index, outputDirectory, fragments=NULL, deltaWs=NULL, breakTrack=NULL, confidenceIntervals=NULL, maskedRegions=NULL, hotspots=NULL, breaksGraph=NULL, col="103,139,139 243,165,97") {
   
-  ## Insert chromosome for in case it's missing
-  insertchr <- function(gr) {
-    mask <- which(!grepl('chr', seqnames(gr)))
-    mcols(gr)$chromosome <- as.character(seqnames(gr))
-    mcols(gr)$chromosome[mask] <- sub(pattern='^', replacement='chr', mcols(gr)$chromosome[mask])
-    mcols(gr)$chromosome <- as.factor(mcols(gr)$chromosome)
-    return(gr)
-  }
+    ## Insert chromosome for in case it's missing
+    insertchr <- function(gr) {
+        mask <- which(!grepl('chr', seqnames(gr)))
+        mcols(gr)$chromosome <- as.character(seqnames(gr))
+        mcols(gr)$chromosome[mask] <- sub(pattern='^', replacement='chr', mcols(gr)$chromosome[mask])
+        mcols(gr)$chromosome <- as.factor(mcols(gr)$chromosome)
+        return(gr)
+    }
 
-  ## Write read fragments to file
-  if (!is.null(fragments)) {
-    fragments <- insertchr(fragments)
-    savefile.reads <- file.path(outputDirectory, paste0(index, '_reads.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.reads, " ...")
-    savefile.reads.gz <- gzfile(savefile.reads, 'w')
-    head_reads <- paste0('track name=', index, '_reads visibility=1 colorByStrand="', col, '"') 
-    utils::write.table(head_reads, file=savefile.reads.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
-    if (length(fragments)>0) {
-      bedfile <- as.data.frame(fragments)[c('chromosome','start','end', 'mapq', 'strand')]
-      bedfile$name <- 0 # adds a column of 0 as the'name' in the bedfile
-      bedfile <- bedfile[c('chromosome','start','end','name','mapq', 'strand')]
-    } else {
-      bedfile <- data.frame(chromosome='chr1', start=1, end=1, name=NA, mapq=0, strand='.')
+    ## Write read fragments to file
+    if (!is.null(fragments) & length(fragments) > 0) {
+        fragments <- insertchr(fragments)
+        savefile.reads <- file.path(outputDirectory, paste0(index, '_reads.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.reads, " ...")
+        savefile.reads.gz <- gzfile(savefile.reads, 'w')
+        head_reads <- paste0('track name=', index, '_reads visibility=1 colorByStrand="', col, '"') 
+        utils::write.table(head_reads, file=savefile.reads.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
+        if (length(fragments)>0) {
+            bedfile <- as.data.frame(fragments)[c('chromosome','start','end', 'mapq', 'strand')]
+            bedfile$name <- 0 # adds a column of 0 as the'name' in the bedfile
+            bedfile <- bedfile[c('chromosome','start','end','name','mapq', 'strand')]
+        } else {
+            bedfile <- data.frame(chromosome='chr1', start=1, end=1, name=NA, mapq=0, strand='.')
+        }
+        utils::write.table(bedfile,file=savefile.reads.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.reads.gz)
+        stopTimedMessage(ptm)
     }
-    utils::write.table(bedfile,file=savefile.reads.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.reads.gz)
-    stopTimedMessage(ptm)
-  }
 
-  ## Write breakPoints and confidence intervals to file
-  if (!is.null(breakTrack)) {
-    breakTrack <- insertchr(breakTrack)
-    savefile.breakPoints <- file.path(outputDirectory, paste0(index, '_breakPoints.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.breakPoints, " ...")
-    savefile.breakPoints.gz <- gzfile(savefile.breakPoints, 'w')
-    head_br <- paste('track name=', index, '_BPs description=BedGraph_of_breakpoints_',index,'_allChr visibility=dense color=75,125,180', sep="")
-    utils::write.table(head_br,  file=savefile.breakPoints.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
-    if (length(breakTrack)>0) {
-      bpG <-  as.data.frame(breakTrack)[c('chromosome','start','end','genoT')]
-    } else {
-      bpG <- data.frame(chromosome='chr1', start=1, end=1, genoT=NA)
+    ## Write breakPoints and confidence intervals to file
+    if (!is.null(breakTrack) & length(breakTrack) > 0) {
+        breakTrack <- insertchr(breakTrack)
+        savefile.breakPoints <- file.path(outputDirectory, paste0(index, '_breakPoints.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.breakPoints, " ...")
+        savefile.breakPoints.gz <- gzfile(savefile.breakPoints, 'w')
+        head_br <- paste('track name=', index, '_BPs description=BedGraph_of_breakpoints_',index,'_allChr visibility=dense color=75,125,180', sep="")
+        utils::write.table(head_br, file=savefile.breakPoints.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
+        if (length(breakTrack)>0) {
+            bpG <-  as.data.frame(breakTrack)[c('chromosome','start','end','genoT')]
+        } else {
+            bpG <- data.frame(chromosome='chr1', start=1, end=1, genoT=NA)
+        }
+        if (!is.null(confidenceIntervals)) {
+            bpG$score <- 0
+            bpG$strand <- '.'
+            bpG$thickStart <- bpG$start
+            bpG$thickEnd <- bpG$end
+            bpG$start <- start(confidenceIntervals)
+            bpG$end <- end(confidenceIntervals)
+        }
+        utils::write.table(bpG, file=savefile.breakPoints.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.breakPoints.gz)
+        stopTimedMessage(ptm)
     }
-    if (!is.null(confidenceIntervals)) {
-        bpG$score <- 0
-        bpG$strand <- '.'
-        bpG$thickStart <- bpG$start
-        bpG$thickEnd <- bpG$end
-        bpG$start <- start(confidenceIntervals)
-        bpG$end <- end(confidenceIntervals)
-    }
-    utils::write.table(bpG, file=savefile.breakPoints.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.breakPoints.gz)
-    stopTimedMessage(ptm)
-  }
 
-  ## Write deltaWs to file
-  if (!is.null(deltaWs)) {
-    deltaWs <- insertchr(deltaWs)
-    savefile.deltaWs <- file.path(outputDirectory, paste0(index, '_deltaWs.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.deltaWs, " ...")
-    savefile.deltaWs.gz <- gzfile(savefile.deltaWs, 'w')
-    head_dW <- paste('track type=bedGraph name=', index,'_dWs description=BedGraph_of_deltaWs_',index, '_allChr visibility=full color=200,100,10', sep="")
-    utils::write.table(head_dW, file=savefile.deltaWs.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
-    if (length(deltaWs)>0) {
-      bedG <- as.data.frame(deltaWs)[c('chromosome','start','end','deltaW')]
-    } else {
-      bedG <- data.frame(chromosome='chr1', start=1, end=1, deltaW=NA)
+    ## Write deltaWs to file
+    if (!is.null(deltaWs) & length(deltaWs) > 0) {
+        deltaWs <- insertchr(deltaWs)
+        savefile.deltaWs <- file.path(outputDirectory, paste0(index, '_deltaWs.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.deltaWs, " ...")
+        savefile.deltaWs.gz <- gzfile(savefile.deltaWs, 'w')
+        head_dW <- paste('track type=bedGraph name=', index,'_dWs description=BedGraph_of_deltaWs_',index, '_allChr visibility=full color=200,100,10', sep="")
+        utils::write.table(head_dW, file=savefile.deltaWs.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
+        if (length(deltaWs)>0) {
+            bedG <- as.data.frame(deltaWs)[c('chromosome','start','end','deltaW')]
+        } else {
+            bedG <- data.frame(chromosome='chr1', start=1, end=1, deltaW=NA)
+        }
+        utils::write.table(bedG, file=savefile.deltaWs.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.deltaWs.gz)
+        stopTimedMessage(ptm)
     }
-    utils::write.table(bedG, file=savefile.deltaWs.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.deltaWs.gz)
-    stopTimedMessage(ptm)
-  }
 
-  ## Write maskedRegions to file
-  if (!is.null(maskedRegions)) {
-    maskedRegions <- insertchr(maskedRegions)
-    savefile.masked <- file.path(outputDirectory, paste0(index, '_masked.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.masked, " ...")
-    savefile.masked.gz <- gzfile(savefile.masked, 'w')
-    head_masked <- paste('track name=', index,' description=BedGraph_of_maskedRegions_',index, '_allChr visibility=1 color=0,0,0', sep="")
-    utils::write.table(head_masked, file=savefile.masked.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
-    if (length(maskedRegions)>0) {
-      bedG <- as.data.frame(maskedRegions)[c('chromosome','start','end')]
-    } else {
-      bedG <- data.frame(chromosome='chr1', start=1, end=1)
+    ## Write maskedRegions to file
+    if (!is.null(maskedRegions) & length(maskedRegions) > 0) {
+        maskedRegions <- insertchr(maskedRegions)
+        savefile.masked <- file.path(outputDirectory, paste0(index, '_masked.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.masked, " ...")
+        savefile.masked.gz <- gzfile(savefile.masked, 'w')
+        head_masked <- paste('track name=', index,' description=BedGraph_of_maskedRegions_',index, '_allChr visibility=1 color=0,0,0', sep="")
+        utils::write.table(head_masked, file=savefile.masked.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')   
+        if (length(maskedRegions)>0) {
+            bedG <- as.data.frame(maskedRegions)[c('chromosome','start','end')]
+        } else {
+            bedG <- data.frame(chromosome='chr1', start=1, end=1)
+        }
+        utils::write.table(bedG, file=savefile.masked.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.masked.gz)
+        stopTimedMessage(ptm)
     }
-    utils::write.table(bedG, file=savefile.masked.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.masked.gz)
-    stopTimedMessage(ptm)
-  }
 
-  ## Write hotspots to file
-  if (!is.null(hotspots)) {
-    hotspots <- insertchr(hotspots)
-    savefile.hotspots <- file.path(outputDirectory, paste0(index, '_hotspots.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.hotspots, " ...")
-    savefile.hotspots.gz <- gzfile(savefile.hotspots, 'w')
-    head_hotspots <- paste('track name=', index,' description=BedGraph_of_hotspots_',index, '_allChr visibility=1 color=255,0,0', sep="")
-    utils::write.table(head_hotspots, file=savefile.hotspots.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
-    if (length(hotspots)>0) {
-      bedG <- as.data.frame(hotspots)[c('chromosome','start','end')]
-    } else {
-      bedG <- data.frame(chromosome='chr1', start=1, end=1)
+    ## Write hotspots to file
+    if (!is.null(hotspots) & length(hotspots) > 0) {
+        hotspots <- insertchr(hotspots)
+        savefile.hotspots <- file.path(outputDirectory, paste0(index, '_hotspots.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.hotspots, " ...")
+        savefile.hotspots.gz <- gzfile(savefile.hotspots, 'w')
+        head_hotspots <- paste('track name=', index,' description=BedGraph_of_hotspots_',index, '_allChr visibility=1 color=255,0,0', sep="")
+        utils::write.table(head_hotspots, file=savefile.hotspots.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
+        if (length(hotspots)>0) {
+            bedG <- as.data.frame(hotspots)[c('chromosome','start','end')]
+        } else {
+            bedG <- data.frame(chromosome='chr1', start=1, end=1)
+        }
+        utils::write.table(bedG, file=savefile.hotspots.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.hotspots.gz)
+        stopTimedMessage(ptm)
     }
-    utils::write.table(bedG, file=savefile.hotspots.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.hotspots.gz)
-    stopTimedMessage(ptm)
-  }
 
-  ## Write breakpoint summary to file
-  if (!is.null(breaksGraph)) {
-    breaksGraph <- insertchr(breaksGraph)
-    savefile.breaksGraph <- file.path(outputDirectory, paste0(index, '_BreaksGraph.bed.gz'))
-    ptm <- startTimedMessage("Writing to file ", savefile.breaksGraph, " ...")
-    savefile.breaksGraph.gz <- gzfile(savefile.breaksGraph, 'w')
-    head_breaks <- paste('track type=bedGraph name=', index,' description=BedGraph_of_breakpoints_',index, '_allChr visibility=dense color=125,35,190', sep="")
-    utils::write.table(head_breaks, file=savefile.breaksGraph.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
-    if (length(breaksGraph)>0) {
-      bedG <- as.data.frame(breaksGraph)[c('chromosome','start','end','hits')]
-    } else {
-      bedG <- data.frame(chromosome='chr1', start=1, end=1)
+    ## Write breakpoint summary to file
+    if (!is.null(breaksGraph) & length(breaksGraph) > 0) {
+        breaksGraph <- insertchr(breaksGraph)
+        savefile.breaksGraph <- file.path(outputDirectory, paste0(index, '_BreaksGraph.bed.gz'))
+        ptm <- startTimedMessage("Writing to file ", savefile.breaksGraph, " ...")
+        savefile.breaksGraph.gz <- gzfile(savefile.breaksGraph, 'w')
+        head_breaks <- paste('track type=bedGraph name=', index,' description=BedGraph_of_breakpoints_',index, '_allChr visibility=dense color=125,35,190', sep="")
+        utils::write.table(head_breaks, file=savefile.breaksGraph.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=FALSE, sep='\t')
+        if (length(breaksGraph)>0) {
+            bedG <- as.data.frame(breaksGraph)[c('chromosome','start','end','hits')]
+        } else {
+            bedG <- data.frame(chromosome='chr1', start=1, end=1)
+        }
+        utils::write.table(bedG, file=savefile.breaksGraph.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
+        close(savefile.breaksGraph.gz)
+        stopTimedMessage(ptm)
     }
-    utils::write.table(bedG, file=savefile.breaksGraph.gz, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
-    close(savefile.breaksGraph.gz)
-    stopTimedMessage(ptm)
-  }
 }

@@ -11,7 +11,7 @@ breakSeekr(deltaWs, trim = 10, peakTh = 0.33, zlim = 3.291)
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 
-\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint (e.g. 0.33 is 1/3 of max(delta)).}
+\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint (e.g. 0.33 is 1/3 of max(deltaW)).}
 
 \item{zlim}{The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).}
 }
@@ -19,17 +19,20 @@ breakSeekr(deltaWs, trim = 10, peakTh = 0.33, zlim = 3.291)
 A \code{\link[GenomicRanges]{GRanges}} object containing breakpoint coordinates with various metadata columns.
 }
 \description{
-Find breakpoints from deltaWs by <TODO:DAVID here a description of how breakpoints are found>.
+Find breakpoints from deltaWs by localizing significant peaks based on z-score calculation.
 }
 \examples{
-filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-file <- list.files(filepath, full.names=TRUE)[1] 
-gr <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+## Get an example file 
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file
+gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+## Calculate deltaW values
 dw <- deltaWCalculator(gr)
+## Get significant peaks in deltaW values
 breaks <- breakSeekr(dw)
 
 }
 \author{
-Ashley Sanders, David Porubsky, Aaron Taudt
+David Porubsky, Aaron Taudt, Ashley Sanders
 }
-

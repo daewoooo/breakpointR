@@ -16,4 +16,3 @@ The \code{BreakPoint} object is output of the function \code{\link{runBreakpoint
 \seealso{
 runBreakpointr
 }
-

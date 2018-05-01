@@ -7,7 +7,7 @@
 hotspotter(gr.list, bw, pval = 1e-08)
 }
 \arguments{
-\item{gr.list}{A list with \code{\link[GenomicRanges]{GRanges}} object containing the coordinates of the genomic events.}
+\item{gr.list}{A list or \code{\link[GenomicRanges]{GRangesList}} with \code{\link[GenomicRanges]{GRanges}} object containing the coordinates of the genomic events.}
 
 \item{bw}{Bandwidth used for kernel density estimation (see \code{\link[stats]{density}}).}
 
@@ -34,4 +34,3 @@ hotspots <- hotspotter(breaks, bw=1e6)
 \author{
 Aaron Taudt
 }
-

@@ -20,4 +20,3 @@ Write an BreakpointR configuration file from a list structure.
 \author{
 Aaron Taudt
 }
-

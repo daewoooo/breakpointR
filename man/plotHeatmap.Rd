@@ -7,15 +7,17 @@
 plotHeatmap(files2plot, file = NULL, hotspots = NULL)
 }
 \arguments{
+\item{files2plot}{A list of files that contains \code{\link{BreakPoint}} objects or a single \code{\link{BreakPoint}} object.}
+
 \item{file}{Name of the file to plot to.}
 
-\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
+\item{hotspots}{A \code{\link[GenomicRanges]{GRanges}} object with locations of breakpoint hotspots.}
 }
 \value{
-A \code{\link[ggplot2:ggplot]{ggplot}} object of \code{NULL}, depending on option \code{file}.
+A \code{\link[ggplot2:ggplot]{ggplot}} object.
 }
 \description{
-Plot a genome wide heatmap of template inheritance states.
+Plot a genome-wide heatmap of template inheritance states from a \code{\link{BreakPoint}} object.
 }
 \examples{
 ## Get example BreakPoint objects to plot
@@ -27,4 +29,3 @@ plotHeatmap(example_BreakPoints)
 \author{
 David Porubsky, Aaron Taudt, Ashley Sanders
 }
-

@@ -6,10 +6,10 @@
 \usage{
 createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
   pair2frgm = FALSE, min.mapq = 10, remove.duplicate.reads = TRUE,
-  WC.cutoff = 0.9, background = 0.02)
+  WC.cutoff = 0.9, background = 0.05)
 }
 \arguments{
-\item{file.list}{TODO:DAVID}
+\item{file.list}{A list of BAM files to process.}
 
 \item{chromosomes}{If only a subset of the chromosomes should be binned, specify them here.}
 
@@ -26,7 +26,7 @@ createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
 \item{background}{The amount of background introduced into the genotype test.}
 }
 \value{
-TODO:DAVID
+A \code{\link[GenomicRanges]{GRanges}} object.
 }
 \description{
 This function will move through BAM files in a folder, read in each individual file and go through each chromosome, 
@@ -35,14 +35,12 @@ append to a new composite file for that chromosome, order the composite file of 
 }
 \examples{
 ## Get some example files
-inputfolder <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+inputfolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
 files <- list.files(inputfolder, full.names=TRUE, pattern="bam$")
 ## Create the composite file
-composite <- createCompositeFile(files, chromosomes=paste0('chr', c(1:22, 'X')),
-                   pairedEndReads=FALSE)
+composite <- createCompositeFile(files, chromosomes='chr22', pairedEndReads=FALSE)
                    
 }
 \author{
 Ashley Sanders, David Porubsky
 }
-

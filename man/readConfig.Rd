@@ -18,4 +18,3 @@ Read an BreakpointR configuration file into a list structure. The configuration 
 \author{
 Aaron Taudt
 }
-

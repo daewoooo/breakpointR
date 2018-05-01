@@ -18,16 +18,18 @@ The input \code{frags} with additional meta-data columns.
 This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
 }
 \examples{
-filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-file <- list.files(filepath, full.names=TRUE)[1] 
-fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+## Get an example file
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+## Calculate deltaW values
 dw <- deltaWCalculator(fragments)
 
-}
-\author{
-Aaron Taudt
 }
 \seealso{
 readBamFileAsGRanges
 }
-
+\author{
+Aaron Taudt
+}

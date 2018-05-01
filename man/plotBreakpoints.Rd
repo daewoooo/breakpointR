@@ -2,32 +2,28 @@
 % Please edit documentation in R/plotting.R
 \name{plotBreakpoints}
 \alias{plotBreakpoints}
-\title{Plotting functions for \pkg{\link{breakpointR}}}
+\title{Plotting genome-wide ideograms \pkg{\link{breakpointR}}}
 \usage{
 plotBreakpoints(files2plot, file = NULL)
 }
 \arguments{
-\item{file}{Name of the file to plot to.}
+\item{files2plot}{A list of files that contains \code{\link{BreakPoint}} objects or a single \code{\link{BreakPoint}} object.}
 
-\item{breakpoints}{A list of \code{\link{BreakPoint}} objects or a vector with files that contain such objects.}
+\item{file}{Name of the file to plot to.}
 }
 \value{
 A list with \code{\link[ggplot2:ggplot]{ggplot}} objects.
 }
 \description{
-This function will produce several plots from a \code{\link{BreakPoint}} object.
+This function will create genome-wide ideograms from a \code{\link{BreakPoint}} object.
 }
 \examples{
 ## Get an example file
-exampleFolder <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-## Run breakpointR
-brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE,
-                         chromosomes=paste0('chr', c(1:22,'X')))
-## Plot them
-plotBreakpoints(brkpts)
+## Plot the file
+plotBreakpoints(exampleFile)
 }
 \author{
 David Porubsky, Aaron Taudt, Ashley Sanders
 }
-

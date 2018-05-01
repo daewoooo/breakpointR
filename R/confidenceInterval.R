@@ -4,18 +4,27 @@
 #'
 #' @param breaks Genotyped breakpoints as outputted from function \code{\link{GenotypeBreaks}}.
 #' @param fragments Read fragments from function \code{\link{readBamFileAsGRanges}}.
+#' @param conf Desired confidence interval of localized breakpoints.
 #' @inheritParams GenotypeBreaks
-#' @param conf Desired confidence interval.
+#' @return A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
+#' @author Aaron Taudt, David Porubsky
+#' @export
 #' @examples
-#'filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-#'file <- list.files(filepath, full.names=TRUE)[1]
-#'fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+#'## Get an example file  
+#'exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Load the file
+#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+#'## Calculate deltaW values
 #'dw <- deltaWCalculator(fragments)
+#'## Get significant peaks in deltaW values
 #'breaks <- breakSeekr(dw)
+#'## Genotype regions between breakpoints
 #'gbreaks <- GenotypeBreaks(breaks, fragments)
+#'## Calculate confidence intervals of genotyped breakpoints
 #'confint <- confidenceInterval(gbreaks, fragments, background=0.02)
 #'
-confidenceInterval <- function(breaks, fragments, background, conf=0.99) {
+confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 
     ## Assign probabilities for a read belonging to genotype at breakpoint
     probs <- array(NA, dim = c(2,2,6), dimnames = list(strand=c('-','+'), side=c('left','right'), genotype=c('ww-wc','ww-cc','wc-ww','wc-cc','cc-ww','cc-wc')))
@@ -86,18 +95,27 @@ confidenceInterval <- function(breaks, fragments, background, conf=0.99) {
 #' 
 #' @param breaks Genotyped breakpoints as outputted from function \code{\link{GenotypeBreaks}}.
 #' @param fragments Read fragments from function \code{\link{readBamFileAsGRanges}}.
+#' @param conf Desired confidence interval of localized breakpoints.
 #' @inheritParams GenotypeBreaks
-#' @param conf Desired confidence interval.
+#' @return A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
+#' @author Aaron Taudt, David Porubsky
+#' @export
 #' @examples
-#'filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-#'file <- list.files(filepath, full.names=TRUE)[1] 
-#'fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+#'## Get an example file  
+#'exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Load the file
+#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+#'## Calculate deltaW values
 #'dw <- deltaWCalculator(fragments)
+#'## Get significant peaks in deltaW values
 #'breaks <- breakSeekr(dw)
+#'## Genotype regions between breakpoints
 #'gbreaks <- GenotypeBreaks(breaks, fragments)
+#'## Calculate confidence intervals of genotyped breakpoints
 #'confint <- confidenceInterval.binomial(gbreaks, fragments, background=0.02)
 #' 
-confidenceInterval.binomial <- function(breaks, fragments, background, conf=0.99) {
+confidenceInterval.binomial <- function(breaks, fragments, background=0.02, conf=0.99) {
   
     ## Assign probabilities for a read belonging to genotype at breakpoint
     probs <- array(NA, dim = c(2,2,6), dimnames = list(strand=c('-','+'), side=c('left','right'), genotype=c('ww-wc','ww-cc','wc-ww','wc-cc','cc-ww','cc-wc')))
@@ -133,7 +151,7 @@ confidenceInterval.binomial <- function(breaks, fragments, background, conf=0.99
                     strandofread <- as.character(strand(cfrags)[ind-i1])
                     numReads[strandofread] <- numReads[strandofread] + 1
                     strandtocompare <- names(which(probs[, 'left', genotype] >= probs[, 'right', genotype]))
-                    p <- pbinom(q = numReads[strandtocompare], size = sum(numReads), prob = probs[strandofread, 'left', genotype])
+                    p <- stats::pbinom(q = numReads[strandtocompare], size = sum(numReads), prob = probs[strandofread, 'left', genotype])
                 }
                 start(cbreaks)[ibreak] <- start(cfrags)[ind-i1]
                 # Right side
@@ -151,7 +169,7 @@ confidenceInterval.binomial <- function(breaks, fragments, background, conf=0.99
                     strandofread <- as.character(strand(cfrags)[ind+i1])
                     numReads[strandofread] <- numReads[strandofread] + 1
                     strandtocompare <- names(which(probs[, 'right', genotype] >= probs[, 'left', genotype]))
-                    p <- pbinom(q = numReads[strandtocompare], size = sum(numReads), prob = probs[strandofread, 'right', genotype])
+                    p <- stats::pbinom(q = numReads[strandtocompare], size = sum(numReads), prob = probs[strandofread, 'right', genotype])
                 }
                 end(cbreaks)[ibreak] <- end(cfrags)[ind+i1]
             }

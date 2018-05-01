@@ -4,28 +4,40 @@
 \alias{confidenceInterval.binomial}
 \title{Estimate confidence intervals for breakpoints}
 \usage{
-confidenceInterval.binomial(breaks, fragments, background, conf = 0.99)
+confidenceInterval.binomial(breaks, fragments, background = 0.02,
+  conf = 0.99)
 }
 \arguments{
 \item{breaks}{Genotyped breakpoints as outputted from function \code{\link{GenotypeBreaks}}.}
 
 \item{fragments}{Read fragments from function \code{\link{readBamFileAsGRanges}}.}
 
-\item{background}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
+\item{background}{The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.}
 
-\item{conf}{Desired confidence interval.}
+\item{conf}{Desired confidence interval of localized breakpoints.}
+}
+\value{
+A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 }
 \description{
 Estimate confidence intervals for breakpoints by going outwards from the breakpoint read by read, and performing a binomial test of getting the observed or a more extreme outcome, given that the reads within the confidence interval belong to the other side of the breakpoint.
 }
 \examples{
-filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-file <- list.files(filepath, full.names=TRUE)[1] 
-fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+## Get an example file  
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+## Calculate deltaW values
 dw <- deltaWCalculator(fragments)
+## Get significant peaks in deltaW values
 breaks <- breakSeekr(dw)
+## Genotype regions between breakpoints
 gbreaks <- GenotypeBreaks(breaks, fragments)
+## Calculate confidence intervals of genotyped breakpoints
 confint <- confidenceInterval.binomial(gbreaks, fragments, background=0.02)
 
 }
-
+\author{
+Aaron Taudt, David Porubsky
+}

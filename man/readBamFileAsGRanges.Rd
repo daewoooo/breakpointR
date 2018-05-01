@@ -5,7 +5,7 @@
 \title{Import BAM file into GRanges}
 \usage{
 readBamFileAsGRanges(file, bamindex = file, chromosomes = NULL,
-  pairedEndReads = FALSE, min.mapq = 10, remove.duplicate.reads = FALSE,
+  pairedEndReads = FALSE, min.mapq = 10, remove.duplicate.reads = TRUE,
   pair2frgm = FALSE)
 }
 \arguments{
@@ -24,18 +24,19 @@ readBamFileAsGRanges(file, bamindex = file, chromosomes = NULL,
 \item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}}.
+A \code{\link[GenomicRanges]{GRanges}} object.
 }
 \description{
 Import aligned reads from a BAM file into a \code{\link[GenomicRanges]{GRanges}} object.
 }
 \examples{
-filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-file <- list.files(filepath, full.names=TRUE)[1] 
-gr <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
+## Get an example file 
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file
+gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
 
 }
 \author{
-Aaron Taudt, David Porubsky, Ashley Sanders
+David Porubsky, Aaron Taudt, Ashley Sanders
 }
-

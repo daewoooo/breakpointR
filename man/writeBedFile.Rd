@@ -37,11 +37,10 @@ Write a bedfile from Breakpoint.R files for upload on to UCSC Genome browser
 }
 \examples{
 ## Get an example file
-exampleFolder <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Run breakpointR
-brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE,
-                         chromosomes=paste0("chr", c(1:22,'X')))
+brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE, chromosomes='chr1')
 ## Write results to BED files
 writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragments,
            deltaWs=brkpts$deltas, breakTrack=brkpts$breaks,
@@ -51,4 +50,3 @@ writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragm
 \author{
 Ashley Sanders, David Porubsky, Aaron Taudt
 }
-

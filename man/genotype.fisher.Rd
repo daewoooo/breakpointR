@@ -26,4 +26,3 @@ Genotype read numbers with Fisher's exact test.
 \author{
 Ashley Sanders, David Porubsky, Aaron Taudt
 }
-

@@ -4,20 +4,26 @@
 #'
 #' @param breaks A \code{\link[GenomicRanges]{GRanges}} object with breakpoint coordinates.
 #' @param fragments A \code{\link[GenomicRanges]{GRanges}} object with read fragments.
-#' @param background The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.
+#' @param background The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.
 #' @param minReads The minimal number of reads between two breaks required for genotyping.
 #' @return A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordinates.
-#' @author Ashley Sanders, David Porubsky, Aaron Taudt
+#' @author David Porubsky, Ashley Sanders, Aaron Taudt
 #' @importFrom stats fisher.test
-#' @examples 
-#' filepath <- system.file("extdata", "breakpointer", package="strandseqExampleData")
-#' file <- list.files(filepath, full.names=TRUE)[1] 
-#' fragments <- readBamFileAsGRanges(file, pairedEndReads=FALSE)
-#' dw <- deltaWCalculator(fragments)
-#' breaks <- breakSeekr(dw)
-#' gbreaks <- GenotypeBreaks(breaks, fragments)
+#' @export
+#' @examples
+#'## Get an example file 
+#'exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Load the file 
+#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+#'## Calculate deltaW values
+#'dw <- deltaWCalculator(fragments)
+#'## Get significant peaks in deltaW values
+#'breaks <- breakSeekr(dw)
+#'## Genotype regions between breakpoints
+#'gbreaks <- GenotypeBreaks(breaks, fragments)
 #'
-GenotypeBreaks <- function(breaks, fragments, background=0.02, minReads=10)
+GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10)
 {
     if (length(breaks)==0) {
         stop("argument 'breaks' is empty")
@@ -32,7 +38,7 @@ GenotypeBreaks <- function(breaks, fragments, background=0.02, minReads=10)
         strand(breaks.strand) <- '*'
         # Remove the non-used seqlevels
         breaks.strand <- keepSeqlevels(breaks.strand, value=chrom)
-        breakrange <- gaps(breaks.strand)
+        breakrange <- GenomicRanges::gaps(breaks.strand)
         breakrange <- breakrange[strand(breakrange)=='*']
         
         ## pull out reads of each line, and genotype in the fragments
@@ -65,12 +71,12 @@ GenotypeBreaks <- function(breaks, fragments, background=0.02, minReads=10)
     breakrange.new <- unlist(breakrange.list, use.names=FALSE)
     
     if (length(breakrange.new)) {
-	## Refine breakpoint regions to the highest deltaW in the given region
+        ## Refine breakpoint regions to the highest deltaW in the given region
         hits <- GenomicRanges::findOverlaps(breakrange.new, breaks)
-        ToRefine <- split(breaks[subjectHits(hits)], queryHits(hits))
-        refined <- unlist(endoapply(ToRefine, RefineBreaks), use.names = F)
+        ToRefine <- split(breaks[S4Vectors::subjectHits(hits)], S4Vectors::queryHits(hits))
+        refined <- unlist(endoapply(ToRefine, RefineBreaks), use.names = FALSE)
         ranges(breakrange.new) <- ranges(refined)
-        breakrange.new$deltaW <- refined$deltaW	  
+        breakrange.new$deltaW <- refined$deltaW
         return(breakrange.new)
     } else {
         return(breakrange.new<-NULL)
@@ -90,8 +96,9 @@ GenotypeBreaks <- function(breaks, fragments, background=0.02, minReads=10)
 #' @param minReads Minimal number of reads to perform the test.
 #' @return A list with the $bestFit and $pval.
 #' @author Ashley Sanders, David Porubsky, Aaron Taudt
-genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=10)
-{  ## FISHER EXACT TEST
+#' 
+genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=10) {
+    ## FISHER EXACT TEST
     result <- list(bestFit=NA, pval=NA)
     if (length(roiReads)==0) {
         return(result)
@@ -121,52 +128,16 @@ genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=
 ####################
 
 RefineBreaks <- function(gr) {
-  maxDeltaW <- max(gr$deltaW)
-  new.gr <- gr[gr$deltaW == maxDeltaW]
-  new.gr <- mergeGR(new.gr)
-  new.gr$deltaW <- maxDeltaW
-  return(new.gr)
+    maxDeltaW <- max(gr$deltaW)
+    new.gr <- gr[gr$deltaW == maxDeltaW]
+    new.gr <- mergeGR(new.gr)
+    new.gr$deltaW <- maxDeltaW
+    return(new.gr)
 }
 
 mergeGR <- function(gr) {
-  gr <- sort(gr)
-  #new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=start(gr[1]), end=end(gr[length(gr)])))
-  new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=min(start(gr)), end=max(end(gr))))
-  return(new.gr)
+    gr <- sort(gr)
+    #new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=start(gr[1]), end=end(gr[length(gr)])))
+    new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=min(start(gr)), end=max(end(gr))))
+    return(new.gr)
 }
-
-############################ old fisher
-
-genotype <- function(cReads, wReads, roiReads, bg=0.02, minR=10, maxiter=10)
-{  ## FISHER EXACT TEST
-  if (length(roiReads)==0) {
-    return(c(NA,NA))
-  }
-  if (is.na(roiReads)) {
-    return(c(NA,NA))
-  }
-  if ( roiReads >= minR ) {
-    CCpVal<- fisher.test(matrix(c(cReads, wReads, round(roiReads*(1-bg)), round(roiReads*bg)), ncol=2, byrow=T))[[1]]
-    WCpVal<-fisher.test(matrix(c(cReads, wReads, round(roiReads*0.5), round(roiReads*0.5)), ncol=2, byrow=T))[[1]]
-    WWpVal<- fisher.test(matrix(c(wReads, cReads, round(roiReads*(1-bg)), round(roiReads*bg)), ncol=2, byrow=T))[[1]]
-    iter <- 1
-    while (CCpVal == WCpVal & WCpVal == WWpVal) { #if pVals are equal, take 10% of reads and recalculate
-      iter <- iter + 1
-      cReads <-cReads*0.1
-      wReads <- wReads*0.1
-      roiReads <-roiReads*0.1
-      CCpVal<- fisher.test(matrix(c(cReads, wReads, round(roiReads*(1-bg)), round(roiReads*bg)), ncol=2, byrow=T))[[1]]
-      WCpVal<-fisher.test(matrix(c(cReads, wReads, round(roiReads*0.5), round(roiReads*0.5)), ncol=2, byrow=T))[[1]]
-      WWpVal<- fisher.test(matrix(c(wReads, cReads, round(roiReads*(1-bg)), round(roiReads*bg)), ncol=2, byrow=T))[[1]]
-      if (iter == maxiter) { break }
-    }
-    
-    pVal<- cbind(CCpVal, WCpVal, WWpVal)
-    maxP<- max(pVal)
-    #if (pVal[which(pVal != maxP)][1] < 0.05 & pVal[which(pVal != maxP)][2] < 0.05) { signf <- '*'} else {signf <- 'ns'}
-    if (maxP == CCpVal) { bestFit <- 'cc'} else if (maxP == WCpVal) { bestFit <- 'wc' } else{ bestFit <- 'ww'}
-  } else { 
-    return(c(NA,NA))
-  }
-  return(c(bestFit, maxP))
-} 

@@ -6,7 +6,7 @@
 \usage{
 runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
   chromosomes = NULL, windowsize = 1e+06, binMethod = "size", trim = 10,
-  peakTh = 0.33, zlim = 3.291, background = 0.02, min.mapq = 10,
+  peakTh = 0.33, zlim = 3.291, background = 0.05, min.mapq = 10,
   pair2frgm = FALSE, minReads = 20, maskRegions = NULL, conf = 0.99)
 }
 \arguments{
@@ -18,17 +18,17 @@ runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
 
 \item{chromosomes}{If only a subset of the chromosomes should be binned, specify them here.}
 
-\item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on binMethod}
+\item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on \code{binMethod}.}
 
-\item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). Default = "size"}
+\item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). By default \code{binMethod='size'}.}
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 
-\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint (e.g. 0.33 is 1/3 of max(delta)).}
+\item{peakTh}{The treshold that the peak deltaWs must pass to be considered a breakpoint (e.g. 0.33 is 1/3 of max(deltaW)).}
 
 \item{zlim}{The number of stdev that the deltaW must pass the peakTh (ensures only significantly higher peaks are considered).}
 
-\item{background}{The percent (e.g. 0.02 = 2\%) of background reads allowed for WW or CC genotype calls.}
+\item{background}{The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
@@ -36,9 +36,9 @@ runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
 
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
-\item{maskRegions}{List of regions to be excluded from the analysis (format: chromosomes start end)}
+\item{maskRegions}{List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).}
 
-\item{conf}{Desired confidence interval.}
+\item{conf}{Desired confidence interval of localized breakpoints.}
 }
 \value{
 A \code{\link{BreakPoint}} object.
@@ -58,13 +58,12 @@ Breakpoints are located in the following way:
 }
 \examples{
 ## Get an example file
-exampleFolder <- system.file("extdata", "breakpointer", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Run breakpointR
-brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE)
+brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)
 
 }
 \author{
-Ashley Sanders, David Porubsky, Aaron Taudt
+David Porubsky, Ashley Sanders, Aaron Taudt
 }
-
