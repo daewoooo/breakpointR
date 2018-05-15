@@ -17,7 +17,7 @@ Imports:
   grDevices,
   stats,
   S4Vectors,
-  GenomeInfoDb,
+  GenomeInfoDb (>= 1.12.3),
   IRanges,
   Rsamtools,
   GenomicAlignments,

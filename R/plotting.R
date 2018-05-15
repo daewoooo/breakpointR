@@ -43,7 +43,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         
         bamfile <- data$ID
         reads <- data$fragments
-        chroms2plot <- seqlevels(reads)
+        chroms2plot <- GenomeInfoDb::seqlevels(reads)
         breaks <- data$breaks
         counts <- data$counts
         lib.metrics <- data$lib.metrics
@@ -246,8 +246,8 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
     #transform genomic ranges to genome-wide coordinates
     grl <- endoapply(grl, transCoord)
     
-    seqlevels(breaks) <- seqlevels(grl)
-    seqlengths(breaks) <- seqlengths(grl)
+    GenomeInfoDb::seqlevels(breaks) <- GenomeInfoDb::seqlevels(grl)
+    GenomeInfoDb::seqlengths(breaks) <- GenomeInfoDb::seqlengths(grl)
 
     # disjoin overlaping breaks
     breaks <- unlist(breaks, use.names=FALSE)
@@ -360,13 +360,13 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
 
     if (class(files2plot) == class.breakpoint) {
         numplots <- 1
-        chroms.in.data <- seqlevels(files2plot$fragments)
+        chroms.in.data <- GenomeInfoDb::seqlevels(files2plot$fragments)
         #files2plot <- list(files2plot)
     } else if (is.character(files2plot)) {
         numplots <- length(files2plot)
         #get sequence levels from a single BreakpointR obejct
         first.file <- loadFromFiles(files2plot[[1]], check.class=class.breakpoint)[[1]]
-        chroms.in.data <- seqlevels(first.file$fragments)
+        chroms.in.data <- GenomeInfoDb::seqlevels(first.file$fragments)
     } else {
       stop("Unsupported object class submitted!!!")
     }
@@ -401,8 +401,8 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
             breaks <- data$breaks
         
             #select reads and breaks for a single chromosome
-            reads.chr <- keepSeqlevels(reads, chr)
-            breaks.chr <- keepSeqlevels(breaks, chr)
+            reads.chr <- GenomeInfoDb::keepSeqlevels(reads, chr, pruning.mode="coarse")
+            breaks.chr <- GenomeInfoDb::keepSeqlevels(breaks, chr, pruning.mode="coarse")
         
             binned.data <- unlist(GenomicRanges::tileGenome(seqlengths(reads.chr), tilewidth = 200000))
         
@@ -495,7 +495,7 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
 transCoord <- function(gr) {
     cum.seqlengths <- cumsum(as.numeric(seqlengths(gr)))
     cum.seqlengths.0 <- c(0,cum.seqlengths[-length(cum.seqlengths)])
-    names(cum.seqlengths.0) <- seqlevels(gr)
+    names(cum.seqlengths.0) <- GenomeInfoDb::seqlevels(gr)
     gr$start.genome <- start(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
     gr$end.genome <- end(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
     return(gr)
