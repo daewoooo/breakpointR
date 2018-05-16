@@ -32,12 +32,12 @@
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)
 #'
-runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
+runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
     if ( class(bamfile) != "GRanges" ) {
         ptm <- startTimedMessage("Reading file ", bamfile, " ...")
-        suppressWarnings( fragments <- readBamFileAsGRanges(bamfile, pairedEndReads=pairedEndReads, chromosomes=chromosomes, remove.duplicate.reads=TRUE, min.mapq=min.mapq, pair2frgm=pair2frgm) )
+        suppressWarnings( fragments <- readBamFileAsGRanges(bamfile, pairedEndReads=pairedEndReads, chromosomes=chromosomes, min.mapq=min.mapq, pair2frgm=pair2frgm, filtAlt=filtAlt) )
         stopTimedMessage(ptm)
     } else {
         fragments <- bamfile
@@ -56,27 +56,31 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     reads.all.chroms <- fragments
   
     deltas.all.chroms <- GenomicRanges::GRangesList()
-    seqlevels(deltas.all.chroms) <- seqlevels(fragments)
+    GenomeInfoDb::seqlevels(deltas.all.chroms) <- GenomeInfoDb::seqlevels(fragments)
+    GenomeInfoDb::seqlengths(deltas.all.chroms) <- GenomeInfoDb::seqlengths(fragments)
     breaks.all.chroms <- GenomicRanges::GRangesList()
-    seqlevels(breaks.all.chroms) <- seqlevels(fragments)
+    GenomeInfoDb::seqlevels(breaks.all.chroms) <- GenomeInfoDb::seqlevels(fragments)
+    GenomeInfoDb::seqlengths(breaks.all.chroms) <- GenomeInfoDb::seqlengths(fragments)
     confint.all.chroms <- GenomicRanges::GRangesList()
-    seqlevels(confint.all.chroms) <- seqlevels(fragments)
+    GenomeInfoDb::seqlevels(confint.all.chroms) <- GenomeInfoDb::seqlevels(fragments)
+    GenomeInfoDb::seqlengths(confint.all.chroms) <- GenomeInfoDb::seqlengths(fragments)
     counts.all.chroms <- GenomicRanges::GRangesList()
-    seqlevels(counts.all.chroms) <- seqlevels(fragments)
+    GenomeInfoDb::seqlevels(counts.all.chroms) <- GenomeInfoDb::seqlevels(fragments)
+    GenomeInfoDb::seqlengths(counts.all.chroms) <- GenomeInfoDb::seqlengths(fragments)
     for (chr in unique(seqnames(fragments))) {
         message("  Working on chromosome ",chr)
         fragments.chr <- fragments[seqnames(fragments)==chr]
-        fragments.chr <- keepSeqlevels(fragments.chr, chr)
+        fragments.chr <- GenomeInfoDb::keepSeqlevels(fragments.chr, chr)
     
         ptm <- startTimedMessage("    calculating deltaWs ...")
         if (binMethod == "size") {
             ## normalize for size of chromosome one and for read counts of each chromosome
-            if (windowsize > seqlengths(fragments)[chr]) {
+            if (windowsize > GenomeInfoDb::seqlengths(fragments)[chr]) {
                 stopTimedMessage(ptm)
                 next
             }
             tiles <- unlist(GenomicRanges::tileGenome(seqlengths(fragments)[chr], tilewidth = windowsize))
-            counts <- countOverlaps(tiles, fragments.chr)
+            counts <- GenomicRanges::countOverlaps(tiles, fragments.chr)
             reads.per.window <- max(10, round(mean(counts[counts>0], trim=0.05)))
           
             dw <- deltaWCalculator(fragments.chr, reads.per.window=reads.per.window)
@@ -125,10 +129,10 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
         if (is.null(newBreaks)) {
             Ws <- length(which(as.logical(strand(fragments.chr) == '-')))
             Cs <- length(which(as.logical(strand(fragments.chr) == '+')))
-            chrRange <- GRanges(seqnames=chr, ranges=IRanges(start=1, end=seqlengths(fragments.chr)[chr]))
+            chrRange <- GenomicRanges::GRanges(seqnames=chr, ranges=IRanges(start=1, end=GenomeInfoDb::seqlengths(fragments.chr)[chr]))
             counts <- cbind(Ws,Cs)
             mcols(chrRange) <- counts
-            seqlengths(chrRange) <- seqlengths(fragments.chr)[chr]
+            seqlengths(chrRange) <- GenomeInfoDb::seqlengths(fragments.chr)[chr]
       
             ## genotype entire chromosome
             WC.ratio <- (chrRange$Ws-chrRange$Cs)/sum(c(chrRange$Ws,chrRange$Cs))
@@ -237,7 +241,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     reads.MB <- round(median(counts))
     
     ## Calculate % of the genome covered
-    red.frags <- reduce(fragments)
+    red.frags <- GenomicRanges::reduce(fragments)
     perc.cov <- ( sum(as.numeric(width(red.frags))) / sum(as.numeric(seqlengths(red.frags))) )*100
     perc.cov <- round(perc.cov, digits = 2)
     

@@ -69,7 +69,7 @@ writeConfig <- function(conf, configfile) {
         cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
     }
     cat("\n[BreakPointR]\n", file=f)
-    for (i1 in c('windowsize', 'binMethod', 'pairedEndReads', 'pair2frgm', 'chromosomes', 'min.mapq', 'trim', 'peakTh', 'zlim', 'background', 'minReads', 'createCompositeFile', 'WC.cutoff', 'maskRegions', 'callHotSpots', 'conf')) {
+    for (i1 in c('windowsize', 'binMethod', 'pairedEndReads', 'pair2frgm', 'chromosomes', 'min.mapq', 'filtAlt', 'trim', 'peakTh', 'zlim', 'background', 'minReads', 'createCompositeFile', 'maskRegions', 'callHotSpots', 'conf')) {
         cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
     }
     close(f, type='w')

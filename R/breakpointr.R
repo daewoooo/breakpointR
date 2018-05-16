@@ -30,7 +30,7 @@
 #'## Run breakpointr
 #'breakpointr(inputfolder, outputfolder, chromosomes='chr22', pairedEndReads=FALSE)
 #'
-breakpointr <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, trim=10, peakTh=0.33, zlim=3.291, background=0.05, minReads=10, createCompositeFile=FALSE, WC.cutoff=0.9, maskRegions=NULL, callHotSpots=FALSE, conf=0.99) {
+breakpointr <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, filtAlt=FALSE, trim=10, peakTh=0.33, zlim=3.291, background=0.05, minReads=10, createCompositeFile=FALSE, maskRegions=NULL, callHotSpots=FALSE, conf=0.99) {
 
 #=======================
 ### Helper functions ###
@@ -70,7 +70,7 @@ if (!is.null(maskRegions)) {
 
 ## Put options into list and merge with conf
 params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes,
-min.mapq=min.mapq, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads, createCompositeFile=createCompositeFile, WC.cutoff=WC.cutoff, maskRegions=maskRegions, callHotSpots=callHotSpots, conf=conf)
+min.mapq=min.mapq, filtAlt=filtAlt, trim=trim, peakTh=peakTh, zlim=zlim, background=background, minReads=minReads, createCompositeFile=createCompositeFile, maskRegions=maskRegions, callHotSpots=callHotSpots, conf=conf)
 config <- c(config, params[setdiff(names(params),names(config))])
 
 ## Checks user input
@@ -140,7 +140,7 @@ if (length(files) == 0) {
 if (createCompositeFile) {
     config[['numCPU']] <- 1 #always use only one CPU for composite file analysis
     savename <- file.path(datapath, paste0('compositeFile', '.RData'))
-    fragments <- createCompositeFile(file.list=files, chromosomes=config[['chromosomes']], pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], WC.cutoff=config[['WC.cutoff']], background=config[['background']])    
+    fragments <- createCompositeFile(file.list=files, chromosomes=config[['chromosomes']], pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], background=config[['background']])    
     ## Find breakpoints
     if (!file.exists(savename)) {  
         breakpoints <- runBreakpointr(bamfile=fragments, ID='compositeFile', pairedEndReads=config[['pairedEndReads']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
@@ -170,7 +170,7 @@ if (createCompositeFile) {
         ## Find breakpoints
         if (!file.exists(savename)) {
             tC <- tryCatch({
-                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
+                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
             }, error = function(err) {
                 stop(file,'\n',err)
             })
@@ -198,7 +198,7 @@ if (createCompositeFile) {
         ## Find breakpoints
         if (!file.exists(savename)) {
             tC <- tryCatch({
-                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
+                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
             }, error = function(err) {
                 stop(file,'\n',err)
             })  
