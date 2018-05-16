@@ -8,7 +8,8 @@
 #' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your file.
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param remove.duplicate.reads A logical indicating whether or not duplicate reads should be kept.
-#' @param pair2frgm Set to \code{TRUE} if every paired-end read should be merged into a single fragment
+#' @param pair2frgm Set to \code{TRUE} if every paired-end read should be merged into a single fragment.
+#' @param filtAlt Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.
 #' @return A \code{\link[GenomicRanges]{GRanges}} object.
 #' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
 #' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
@@ -21,7 +22,7 @@
 #'## Load the file
 #'gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
 #'
-readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEndReads=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, pair2frgm=FALSE) {
+readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEndReads=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, pair2frgm=FALSE, filtAlt=FALSE) {
 
     ## Check if bamindex exists
     bamindex.raw <- sub('\\.bai$', '', bamindex)
@@ -52,16 +53,32 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
     gr <- GenomicRanges::GRanges(seqnames=chroms2use, ranges=IRanges(start=rep(1, length(chroms2use)), end=chrom.lengths[chroms2use]))
     if (!remove.duplicate.reads) {
         if (pairedEndReads) {
-            data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq'))
+            if (filtAlt) {
+                data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq'))
+            } else {
+                data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(which=range(gr), what='mapq'))  
+            }
         } else {
-            data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq'))
+            if (filtAlt) {
+                data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq'))
+            } else {
+                data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(which=range(gr), what='mapq'))
+            }    
         }
     } else {
         if (pairedEndReads) {
-            #NOTE: remove duplicates don't work if there is only one mate of the pair marked as duplicated. Suggestion force proper pairs to do it duplicate removal automatically!!!
-            data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what=c('mapq', 'flag')))
+            if (filtAlt) {
+                #NOTE: remove duplicates don't work if there is only one mate of the pair marked as duplicated. Suggestion force proper pairs to do it duplicate removal automatically!!!
+                data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what=c('mapq', 'flag')))
+            } else {
+                data.raw <- GenomicAlignments::readGAlignmentPairs(file, index=bamindex, param=Rsamtools::ScanBamParam(which=range(gr), what=c('mapq', 'flag')))
+            }    
         } else {
-            data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq', flag=scanBamFlag(isDuplicate=FALSE)))
+            if (filtAlt) {
+                data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(gr), what='mapq', flag=scanBamFlag(isDuplicate=FALSE)))
+            } else {
+                data.raw <- GenomicAlignments::readGAlignments(file, index=bamindex, param=Rsamtools::ScanBamParam(which=range(gr), what='mapq', flag=scanBamFlag(isDuplicate=FALSE)))
+            }    
         }
     }
 
@@ -75,10 +92,12 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
             data.last <- as(GenomicAlignments::last(data.prop.pairs), 'GRanges')
 
             ## filter XA tag
-            data.first.filt <- is.na(mcols(data.first)$XA)
-            data.last.filt <- is.na(mcols(data.last)$XA)
-
-            mask <- data.first.filt & data.last.filt
+            if (filtAlt) {
+                data.first <- is.na(mcols(data.first)$XA)
+                data.last <- is.na(mcols(data.last)$XA)
+            }
+                
+            mask <- data.first & data.last
 
             data.first <- data.first[mask]
             data.last <- data.last[mask]
@@ -122,19 +141,17 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
             frag.minus.mapq <- data.first.minus$mapq + data.last.plus$mapq
     
             data.frag.plus <- GenomicRanges::GRanges(seqnames=seqnames(data.first.plus), ranges=IRanges(start=start(data.first.plus), end=end(data.last.minus)), strand=strand(data.first.plus), mapq=frag.plus.mapq)
-            seqlengths(data.frag.plus) <- seqlengths(data.first)
+            GenomeInfoDb::seqlengths(data.frag.plus) <- GenomeInfoDb::seqlengths(data.first)
             data.frag.minus <- GenomicRanges::GRanges(seqnames=seqnames(data.first.minus), ranges=IRanges(start=start(data.last.plus), end=end(data.first.minus)), strand=strand(data.first.minus), mapq=frag.minus.mapq)
-            seqlengths(data.frag.minus) <- seqlengths(data.first)
+            GenomeInfoDb::seqlengths(data.frag.minus) <- GenomeInfoDb::seqlengths(data.first)
 
             data <- GenomicRanges::sort(c(data.frag.plus, data.frag.minus), ignore.strand=TRUE)
+            
         } else {
-            #data.first <- as(GenomicAlignments::first(data.raw), 'GRanges')
-            #data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
-            #strand(data.last) <- strand(data.first)
-            #data <- sort(c(data.first, data.last))
+
             data.prop.pairs <- data.raw[GenomicAlignments::isProperPair(data.raw)]
             data <- as(GenomicAlignments::first(data.prop.pairs), 'GRanges') #use only first mate of the read pair in subsequent analysis!!!
-
+            
             ## Filter by mapping quality
             if (!is.null(min.mapq)) {
                 if (any(is.na(mcols(data)$mapq))) {
@@ -143,9 +160,11 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
                 }
                 data <- data[mcols(data)$mapq >= min.mapq]
             }
+            
             ## Filter XA tag
-            data <- data[is.na(mcols(data)$XA)]
-      
+            if (filtAlt) {
+                data <- data[is.na(mcols(data)$XA)]
+            }
             ## Filter out duplicates
             if (remove.duplicate.reads) {
                 bit.flag <- bitwAnd(1024, data$flag)
@@ -166,9 +185,11 @@ readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEn
             data <- data[mcols(data)$mapq >= min.mapq]
         }
         ## Filter XA tag
-        data <- data[is.na(mcols(data)$XA)]
+        if (filtAlt) {
+            data <- data[is.na(mcols(data)$XA)]
+        }        
     }
-    seqlevels(data) <- seqlevels(gr)
+    GenomeInfoDb::seqlevels(data) <- GenomeInfoDb::seqlevels(gr)
     return(data)
 }
 
