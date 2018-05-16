@@ -5,8 +5,8 @@
 \title{Create composite Strand-seq file}
 \usage{
 createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
-  pair2frgm = FALSE, min.mapq = 10, remove.duplicate.reads = TRUE,
-  WC.cutoff = 0.9, background = 0.05)
+  pair2frgm = FALSE, min.mapq = 10, filtAlt = FALSE, WC.cutoff = 0.9,
+  background = 0.05)
 }
 \arguments{
 \item{file.list}{A list of BAM files to process.}
@@ -15,11 +15,11 @@ createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
 
 \item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
 
-\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment.}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
-\item{remove.duplicate.reads}{A logical indicating whether or not duplicate reads should be kept.}
+\item{filtAlt}{Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.}
 
 \item{WC.cutoff}{Percentage of WW or CC reads to consider chromosome being WW or CC}
 

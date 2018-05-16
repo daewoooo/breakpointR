@@ -7,9 +7,9 @@
 breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
   reuse.existing.files = FALSE, windowsize = 1e+06, binMethod = "size",
   pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
-  min.mapq = 10, trim = 10, peakTh = 0.33, zlim = 3.291,
-  background = 0.05, minReads = 10, createCompositeFile = FALSE,
-  WC.cutoff = 0.9, maskRegions = NULL, callHotSpots = FALSE,
+  min.mapq = 10, filtAlt = FALSE, trim = 10, peakTh = 0.33,
+  zlim = 3.291, background = 0.05, minReads = 10,
+  createCompositeFile = FALSE, maskRegions = NULL, callHotSpots = FALSE,
   conf = 0.99)
 }
 \arguments{
@@ -29,11 +29,13 @@ breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 
 \item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
 
-\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment.}
 
 \item{chromosomes}{If only a subset of the chromosomes should be binned, specify them here.}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
+
+\item{filtAlt}{Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.}
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 
@@ -46,8 +48,6 @@ breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
 \item{createCompositeFile}{Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)}
-
-\item{WC.cutoff}{Percentage of WW or CC reads to consider chromosome being WW or CC}
 
 \item{maskRegions}{List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).}
 

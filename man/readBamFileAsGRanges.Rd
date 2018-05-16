@@ -6,7 +6,7 @@
 \usage{
 readBamFileAsGRanges(file, bamindex = file, chromosomes = NULL,
   pairedEndReads = FALSE, min.mapq = 10, remove.duplicate.reads = TRUE,
-  pair2frgm = FALSE)
+  pair2frgm = FALSE, filtAlt = FALSE)
 }
 \arguments{
 \item{file}{Bamfile with aligned reads.}
@@ -21,7 +21,9 @@ readBamFileAsGRanges(file, bamindex = file, chromosomes = NULL,
 
 \item{remove.duplicate.reads}{A logical indicating whether or not duplicate reads should be kept.}
 
-\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment.}
+
+\item{filtAlt}{Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.}
 }
 \value{
 A \code{\link[GenomicRanges]{GRanges}} object.

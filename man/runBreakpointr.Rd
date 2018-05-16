@@ -7,7 +7,8 @@
 runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
   chromosomes = NULL, windowsize = 1e+06, binMethod = "size", trim = 10,
   peakTh = 0.33, zlim = 3.291, background = 0.05, min.mapq = 10,
-  pair2frgm = FALSE, minReads = 20, maskRegions = NULL, conf = 0.99)
+  pair2frgm = FALSE, filtAlt = FALSE, minReads = 20, maskRegions = NULL,
+  conf = 0.99)
 }
 \arguments{
 \item{bamfile}{A file with aligned reads in BAM format.}
@@ -32,7 +33,9 @@ runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
-\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment}
+\item{pair2frgm}{Set to \code{TRUE} if every paired-end read should be merged into a single fragment.}
+
+\item{filtAlt}{Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.}
 
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
