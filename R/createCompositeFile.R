@@ -21,14 +21,14 @@
 #'## Create the composite file
 #'composite <- createCompositeFile(files, chromosomes='chr22', pairedEndReads=FALSE)
 #'                    
-createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE, pair2frgm=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, WC.cutoff=0.90, background=0.05) {
+createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE, pair2frgm=FALSE, min.mapq=10, filtAlt=FALSE, WC.cutoff=0.90, background=0.05) {
 
     message("Creating composite file from ", length(file.list), " bam files")
 
     composite.bam.grl <- GenomicRanges::GRangesList()
     for (bamfile in file.list) {
         message("Working on file ",bamfile)
-        fragments <- suppressWarnings( readBamFileAsGRanges(bamfile, pairedEndReads=pairedEndReads, chromosomes=chromosomes, min.mapq=min.mapq, remove.duplicate.reads=remove.duplicate.reads, pair2frgm=pair2frgm) )
+        fragments <- suppressWarnings( readBamFileAsGRanges(bamfile, pairedEndReads=pairedEndReads, chromosomes=chromosomes, min.mapq=min.mapq, pair2frgm=pair2frgm, filtAlt=filtAlt) )
         if (length(fragments) > 0) { mcols(fragments)$lib <- bamfile } # appends file name to reads
         composite.bam <- GenomicRanges::GRangesList()
         for (chr in unique(seqnames(fragments))) {
