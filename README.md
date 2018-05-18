@@ -32,7 +32,7 @@ To install the development version from Github, follow the steps given below. Th
 How to use BreakPointR
 ----------------------
 
-Please refert to the [vignette](https://github.com/daewoooo/BreakPointR/blob/master/vignettes/breakpointR.pdf) for tutorials on all breakpointR features.
+Please refert to the [vignette](https://github.com/daewoooo/BreakPointR/blob/devel/vignettes/breakpointR-knitr.pdf) for tutorials on all breakpointR features.
 
 Report Errors
 -------------
