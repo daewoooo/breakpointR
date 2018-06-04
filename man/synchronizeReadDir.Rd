@@ -9,7 +9,7 @@ synchronizeReadDir(files2sync, collapseWidth = 5e+06)
 \arguments{
 \item{files2sync}{A list of files that contains \code{\link{BreakPoint}} objects.}
 
-\item{collapseWidth}{...}
+\item{collapseWidth}{A segment size to be collapsed with neighbouring segments.}
 }
 \value{
 A \code{\link[GenomicRanges]{GRanges}} object that reads synchronized by directionality.

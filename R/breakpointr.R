@@ -7,8 +7,7 @@
 #' @param configfile A file specifying the parameters of this function (without \code{inputfolder}, \code{outputfolder} and \code{configfile}). Having the parameters in a file can be handy if many samples with the same parameter settings are to be run. If a \code{configfile} is specified, it will take priority over the command line parameters.
 #' @param numCPU The numbers of CPUs that are used. Should not be more than available on your machine.
 #' @param reuse.existing.files A logical indicating whether or not existing files in \code{outputfolder} should be reused.
-#' @param createCompositeFile Merge single cell data into a single file to increase breakpoint mapping resolution (do not use for SCE mapping)
-#' @param callHotSpots Search for regions of high abundance of breakpoints in single cells (set createCompositeFile=FALSE)
+#' @param callHotSpots Search for regions of high abundance of breakpoints in single cells.
 
 #' @inheritParams readBamFileAsGRanges
 #' @inheritParams runBreakpointr
@@ -30,7 +29,7 @@
 #'## Run breakpointr
 #'breakpointr(inputfolder, outputfolder, chromosomes='chr22', pairedEndReads=FALSE)
 #'
-breakpointr <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, filtAlt=FALSE, trim=10, peakTh=0.33, zlim=3.291, background=0.05, minReads=10, createCompositeFile=FALSE, maskRegions=NULL, callHotSpots=FALSE, conf=0.99) {
+breakpointr <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, filtAlt=FALSE, trim=10, peakTh=0.33, zlim=3.291, background=0.05, minReads=10, maskRegions=NULL, callHotSpots=FALSE, conf=0.99) {
 
 #=======================
 ### Helper functions ###
@@ -55,6 +54,9 @@ if (is.character(configfile)) {
         stop(errstring)
     }
 }
+
+## Set createCompositeFile to FALSE [experimental]
+createCompositeFile=FALSE
 
 ### Mask Regions ###
 if (!is.null(maskRegions)) {

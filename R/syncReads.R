@@ -3,7 +3,7 @@
 #' This function aims to synchronize strand directionality of reads that fall into WW and CC regions.
 #' 
 #' @param files2sync A list of files that contains \code{\link{BreakPoint}} objects.
-#' @param collapseWidth ...
+#' @param collapseWidth A segment size to be collapsed with neighbouring segments.
 #' @return A \code{\link[GenomicRanges]{GRanges}} object that reads synchronized by directionality.
 #' @author David Porubsky
 #' @export
