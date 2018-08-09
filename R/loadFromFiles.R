@@ -8,11 +8,11 @@
 #' @export
 #' @examples
 #'## Get some files that you want to load
-#'exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
 #'## Load the processed data                          
 #'breakpoint.objects <- loadFromFiles(exampleFiles)
-#' 
+ 
 loadFromFiles <- function(files, check.class=c('GRanges', 'BreakPoint')) {
 
     # ptm <- startTimedMessage("Loading data from files ...")

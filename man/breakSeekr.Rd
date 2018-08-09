@@ -23,7 +23,7 @@ Find breakpoints from deltaWs by localizing significant peaks based on z-score c
 }
 \examples{
 ## Get an example file 
-exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Load the file
 gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)

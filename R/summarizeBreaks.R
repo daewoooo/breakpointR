@@ -8,11 +8,10 @@
 #' @export
 #' @examples 
 #'## Get some files that you want to load
-#'exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'file <- list.files(exampleFolder, full.names=TRUE)[1]
 #'breakpoints <- get(load(file))[c('breaks', 'confint')] 
 #'summarizeBreaks(breakpoints)
-#' 
 
 summarizeBreaks <- function(breakpoints) {
     breaks <- breakpoints$breaks

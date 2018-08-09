@@ -24,7 +24,7 @@
 #' 
 #' @examples
 #'## Get some example files
-#'inputfolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'inputfolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 #'outputfolder <- file.path(tempdir(), "breakpointr_example")
 #'## Run breakpointr
 #'breakpointr(inputfolder, outputfolder, chromosomes='chr22', pairedEndReads=FALSE)

@@ -16,7 +16,7 @@
 #' @export
 #' @examples
 #'## Get some example files
-#'inputfolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'inputfolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 #'files <- list.files(inputfolder, full.names=TRUE, pattern="bam$")
 #'## Create the composite file
 #'composite <- createCompositeFile(files, chromosomes='chr22', pairedEndReads=FALSE)

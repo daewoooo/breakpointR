@@ -19,10 +19,9 @@ This function aims to synchronize strand directionality of reads that fall into 
 }
 \examples{
 ## Get some files that you want to load
-exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 files2sync <- list.files(exampleFolder, full.names=TRUE)
 synchronizeReadDir(files2sync)
-
 }
 \author{
 David Porubsky

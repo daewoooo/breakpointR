@@ -10,7 +10,7 @@ Depends:
   R (>= 3.4.0),
   GenomicRanges,
   cowplot,
-  strandseqExampleData
+  breakpointRdata
 Imports:
   methods,
   utils,

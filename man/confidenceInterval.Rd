@@ -23,7 +23,7 @@ Estimate confidence intervals for breakpoints by going outwards from the breakpo
 }
 \examples{
 ## Get an example file  
-exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Load the file
 fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)

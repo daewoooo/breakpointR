@@ -18,7 +18,7 @@
 #' @export
 #' @examples 
 #'## Get an example file
-#'exampleFolder <- system.file("extdata", "example_bams", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE, chromosomes='chr1')
@@ -26,7 +26,7 @@
 #'writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragments,
 #'            deltaWs=brkpts$deltas, breakTrack=brkpts$breaks,
 #'            confidenceIntervals=brkpts$confint)
-#'            
+         
 writeBedFile <- function(index, outputDirectory, fragments=NULL, deltaWs=NULL, breakTrack=NULL, confidenceIntervals=NULL, maskedRegions=NULL, hotspots=NULL, breaksGraph=NULL, col="103,139,139 243,165,97") {
   
     ## Insert chromosome for in case it's missing

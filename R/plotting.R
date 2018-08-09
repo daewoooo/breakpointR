@@ -13,7 +13,7 @@
 #' @export
 #' @examples
 #'## Get an example file
-#'exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Plot the file
 #'plotBreakpoints(exampleFile)
@@ -351,7 +351,7 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 #' @export
 #' @examples
 #'## Get an example file
-#'exampleFolder <- system.file("extdata", "example_results", package="strandseqExampleData")
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
 #'## Plot results
 #'plotBreakpointsPerChr(exampleFiles, chromosomes='chr7')
