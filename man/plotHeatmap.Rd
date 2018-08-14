@@ -11,7 +11,7 @@ plotHeatmap(files2plot, file = NULL, hotspots = NULL)
 
 \item{file}{Name of the file to plot to.}
 
-\item{hotspots}{A \code{\link[GenomicRanges]{GRanges}} object with locations of breakpoint hotspots.}
+\item{hotspots}{A \code{\link{GRanges-class}} object with locations of breakpoint hotspots.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot}} object.

@@ -1,8 +1,8 @@
 #' Calculate deltaWs
 #'
-#' This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+#' This function will calculate deltaWs from a \code{\link{GRanges-class}} object with read fragments.
 #'
-#' @param frags A \code{\link[GenomicRanges]{GRanges}} with read fragments (see \code{\link{readBamFileAsGRanges}}).
+#' @param frags A \code{\link{GRanges-class}} with read fragments (see \code{\link{readBamFileAsGRanges}}).
 #' @param reads.per.window Number of reads in each dynamic window.
 #' @return The input \code{frags} with additional meta-data columns.
 #' @import GenomicRanges

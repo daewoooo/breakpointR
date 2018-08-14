@@ -16,7 +16,7 @@ confidenceInterval(breaks, fragments, background = 0.05, conf = 0.99)
 \item{conf}{Desired confidence interval of localized breakpoints.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
+A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 }
 \description{
 Estimate confidence intervals for breakpoints by going outwards from the breakpoint read by read, and multiplying the probability that the read doesn't belong to the assigned segment.

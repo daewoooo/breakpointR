@@ -7,13 +7,13 @@
 summarizeBreaks(breakpoints)
 }
 \arguments{
-\item{breakpoints}{A list containing breakpoints stored in \code{\link[GenomicRanges]{GRanges}} object.}
+\item{breakpoints}{A list containing breakpoints stored in \code{\link{GRanges-class}} object.}
 }
 \value{
 A \code{data.frame} of compiled breakpoints together with confidence intervals.
 }
 \description{
-This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+This function will calculate deltaWs from a \code{\link{GRanges-class}} object with read fragments.
 }
 \examples{
 ## Get some files that you want to load

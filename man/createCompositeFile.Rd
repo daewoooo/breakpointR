@@ -26,7 +26,7 @@ createCompositeFile(file.list, chromosomes = NULL,
 \item{background}{The amount of background introduced into the genotype test.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object.
+A \code{\link{GRanges-class}} object.
 }
 \description{
 This function will move through BAM files in a folder, read in each individual file and go through each chromosome, 

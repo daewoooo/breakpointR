@@ -6,7 +6,7 @@
 #' @param fragments Read fragments from function \code{\link{readBamFileAsGRanges}}.
 #' @param conf Desired confidence interval of localized breakpoints.
 #' @inheritParams GenotypeBreaks
-#' @return A \code{\link[GenomicRanges]{GRanges}} object of breakpoint ranges for a given confidence interval in \code{conf}.
+#' @return A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 #' @author Aaron Taudt, David Porubsky
 #' @export
 #' @examples

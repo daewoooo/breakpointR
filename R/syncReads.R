@@ -4,7 +4,7 @@
 #' 
 #' @param files2sync A list of files that contains \code{\link{BreakPoint}} objects.
 #' @param collapseWidth A segment size to be collapsed with neighbouring segments.
-#' @return A \code{\link[GenomicRanges]{GRanges}} object that reads synchronized by directionality.
+#' @return A \code{\link{GRanges-class}} object that reads synchronized by directionality.
 #' @author David Porubsky
 #' @importFrom S4Vectors endoapply
 #' @export

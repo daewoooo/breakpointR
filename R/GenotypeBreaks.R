@@ -2,11 +2,11 @@
 #'
 #' Genotype the space between breakpoints with Fisher's exact test.
 #'
-#' @param breaks A \code{\link[GenomicRanges]{GRanges}} object with breakpoint coordinates.
-#' @param fragments A \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+#' @param breaks A \code{\link{GRanges-class}} object with breakpoint coordinates.
+#' @param fragments A \code{\link{GRanges-class}} object with read fragments.
 #' @param background The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.
 #' @param minReads The minimal number of reads between two breaks required for genotyping.
-#' @return A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordinates.
+#' @return A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
 #' @author David Porubsky, Ashley Sanders, Aaron Taudt
 #' @importFrom stats fisher.test
 #' @importFrom S4Vectors endoapply

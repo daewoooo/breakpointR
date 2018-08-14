@@ -12,7 +12,7 @@ synchronizeReadDir(files2sync, collapseWidth = 5e+06)
 \item{collapseWidth}{A segment size to be collapsed with neighbouring segments.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object that reads synchronized by directionality.
+A \code{\link{GRanges-class}} object that reads synchronized by directionality.
 }
 \description{
 This function aims to synchronize strand directionality of reads that fall into WW and CC regions.

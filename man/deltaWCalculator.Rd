@@ -7,7 +7,7 @@
 deltaWCalculator(frags, reads.per.window = 100)
 }
 \arguments{
-\item{frags}{A \code{\link[GenomicRanges]{GRanges}} with read fragments (see \code{\link{readBamFileAsGRanges}}).}
+\item{frags}{A \code{\link{GRanges-class}} with read fragments (see \code{\link{readBamFileAsGRanges}}).}
 
 \item{reads.per.window}{Number of reads in each dynamic window.}
 }
@@ -15,7 +15,7 @@ deltaWCalculator(frags, reads.per.window = 100)
 The input \code{frags} with additional meta-data columns.
 }
 \description{
-This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+This function will calculate deltaWs from a \code{\link{GRanges-class}} object with read fragments.
 }
 \examples{
 ## Get an example file

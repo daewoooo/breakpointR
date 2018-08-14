@@ -7,14 +7,14 @@
 hotspotter(gr.list, bw, pval = 1e-08)
 }
 \arguments{
-\item{gr.list}{A list or \code{\link[GenomicRanges]{GRangesList}} with \code{\link[GenomicRanges]{GRanges}} object containing the coordinates of the genomic events.}
+\item{gr.list}{A list or \code{\link{GRangesList-class}} with \code{\link{GRanges-class}} object containing the coordinates of the genomic events.}
 
 \item{bw}{Bandwidth used for kernel density estimation (see \code{\link[stats]{density}}).}
 
 \item{pval}{P-value cutoff for hotspots.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object containing coordinates of hotspots with p-values.
+A \code{\link{GRanges-class}} object containing coordinates of hotspots with p-values.
 }
 \description{
 Find hotspots of genomic events by using kernel \link{density} estimation.

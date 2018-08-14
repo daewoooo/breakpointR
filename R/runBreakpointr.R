@@ -35,7 +35,8 @@
 runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
-    if ( class(bamfile) != "GRanges" ) {
+    #if ( class(bamfile) != "GRanges" ) {
+    if (!is(bamfile, 'GRanges')) {  
         ptm <- startTimedMessage("Reading file ", bamfile, " ...")
         suppressWarnings( fragments <- readBamFileAsGRanges(bamfile, pairedEndReads=pairedEndReads, chromosomes=chromosomes, min.mapq=min.mapq, pair2frgm=pair2frgm, filtAlt=filtAlt) )
         stopTimedMessage(ptm)

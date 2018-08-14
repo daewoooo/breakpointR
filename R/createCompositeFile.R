@@ -8,7 +8,7 @@
 #' @inheritParams readBamFileAsGRanges
 #' @param WC.cutoff Percentage of WW or CC reads to consider chromosome being WW or CC
 #' @param background The amount of background introduced into the genotype test.
-#' @return A \code{\link[GenomicRanges]{GRanges}} object.
+#' @return A \code{\link{GRanges-class}} object.
 #' @importFrom gtools mixedsort
 #' @importFrom BiocGenerics table
 #' @import GenomicRanges

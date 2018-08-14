@@ -20,7 +20,8 @@
 
 plotBreakpoints <- function(files2plot, file=NULL) {
     
-    if (class(files2plot) == class.breakpoint) {
+    #if (class(files2plot) == class.breakpoint) {
+    if (is(files2plot, class.breakpoint)) {
         numplots <- 1
     } else if (is.character(files2plot)) {
         numplots <- length(files2plot)
@@ -30,9 +31,11 @@ plotBreakpoints <- function(files2plot, file=NULL) {
   
     plots <- list()
     for (i in 1:numplots) {
-        if (class(files2plot) == 'character') {
+        #if (class(files2plot) == 'character') {
+        if (is(files2plot, 'character')) {  
             data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
-        } else if (class(files2plot) == class.breakpoint) {
+        #} else if (class(files2plot) == class.breakpoint) {
+        } else if (is(files2plot, class.breakpoint)) {  
             data <- files2plot
         } else {
             stop("Only 'BreakPoint' class object can be plotted")
@@ -211,7 +214,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
 #'
 #' @param files2plot A list of files that contains \code{\link{BreakPoint}} objects or a single \code{\link{BreakPoint}} object.
 #' @param file Name of the file to plot to.
-#' @param hotspots A \code{\link[GenomicRanges]{GRanges}} object with locations of breakpoint hotspots.
+#' @param hotspots A \code{\link{GRanges-class}} object with locations of breakpoint hotspots.
 #' @return A \code{\link[ggplot2:ggplot]{ggplot}} object.
 #' 
 #' @author David Porubsky, Aaron Taudt, Ashley Sanders
@@ -228,7 +231,8 @@ plotBreakpoints <- function(files2plot, file=NULL) {
 #'
 plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
-    if (class(files2plot) == class.breakpoint) {
+    #if (class(files2plot) == class.breakpoint) {
+    if (is(files2plot, class.breakpoint)) {
         stop("Cannot make heatmap from only one object.")
     } else {
         numlibs2plot <- length(files2plot)
@@ -361,7 +365,8 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
 plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) {
 
-    if (class(files2plot) == class.breakpoint) {
+    #if (class(files2plot) == class.breakpoint) {
+    if (is(files2plot, class.breakpoint)) {  
         numplots <- 1
         chroms.in.data <- GenomeInfoDb::seqlevels(files2plot$fragments)
         #files2plot <- list(files2plot)
@@ -391,9 +396,11 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
         dfplot.breaks.chr <- list()
         for (i in 1:numplots) {
         
-            if (class(files2plot) == 'character') {
+            #if (class(files2plot) == 'character') {
+            if (is(files2plot, 'character')) {  
               data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
-            } else if (class(files2plot) == class.breakpoint) {
+            #} else if (class(files2plot) == class.breakpoint) {
+            } else if (is(files2plot, class.breakpoint)) {  
               data <- files2plot
             } else {
               stop("Only 'BreakPoint' class object can be plotted")
@@ -491,10 +498,10 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
   
 #' Transform genomic coordinates
 #'
-#' Add two columns with transformed genomic coordinates to the \code{\link{GRanges}} object. This is useful for making genomewide plots.
+#' Add two columns with transformed genomic coordinates to the \code{\link{GRanges-class}} object. This is useful for making genomewide plots.
 #'
-#' @param gr A \code{\link{GRanges}} object.
-#' @return The input \code{\link{GRanges}} with two additional metadata columns 'start.genome' and 'end.genome'.
+#' @param gr A \code{\link{GRanges-class}} object.
+#' @return The input \code{\link{GRanges-class}} with two additional metadata columns 'start.genome' and 'end.genome'.
 transCoord <- function(gr) {
     cum.seqlengths <- cumsum(as.numeric(seqlengths(gr)))
     cum.seqlengths.0 <- c(0,cum.seqlengths[-length(cum.seqlengths)])

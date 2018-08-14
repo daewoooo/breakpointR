@@ -1,8 +1,8 @@
 #' Compile breakpoint summary table
 #'
-#' This function will calculate deltaWs from a \code{\link[GenomicRanges]{GRanges}} object with read fragments.
+#' This function will calculate deltaWs from a \code{\link{GRanges-class}} object with read fragments.
 #'
-#' @param breakpoints A list containing breakpoints stored in \code{\link[GenomicRanges]{GRanges}} object.
+#' @param breakpoints A list containing breakpoints stored in \code{\link{GRanges-class}} object.
 #' @return A \code{data.frame} of compiled breakpoints together with confidence intervals.
 #' @author David Porubsky
 #' @export

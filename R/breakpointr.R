@@ -9,7 +9,6 @@
 #' @param reuse.existing.files A logical indicating whether or not existing files in \code{outputfolder} should be reused.
 #' @param callHotSpots Search for regions of high abundance of breakpoints in single cells.
 
-#' @inheritParams readBamFileAsGRanges
 #' @inheritParams runBreakpointr
 #' @inheritParams readBamFileAsGRanges
 #' @inheritParams createCompositeFile

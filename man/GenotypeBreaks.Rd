@@ -7,16 +7,16 @@
 GenotypeBreaks(breaks, fragments, background = 0.05, minReads = 10)
 }
 \arguments{
-\item{breaks}{A \code{\link[GenomicRanges]{GRanges}} object with breakpoint coordinates.}
+\item{breaks}{A \code{\link{GRanges-class}} object with breakpoint coordinates.}
 
-\item{fragments}{A \code{\link[GenomicRanges]{GRanges}} object with read fragments.}
+\item{fragments}{A \code{\link{GRanges-class}} object with read fragments.}
 
 \item{background}{The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.}
 
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordinates.
+A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
 }
 \description{
 Genotype the space between breakpoints with Fisher's exact test.
