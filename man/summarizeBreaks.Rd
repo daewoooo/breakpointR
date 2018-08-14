@@ -19,7 +19,7 @@ This function will calculate deltaWs from a \code{\link{GRanges-class}} object w
 ## Get some files that you want to load
 exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 file <- list.files(exampleFolder, full.names=TRUE)[1]
-breakpoints <- get(load(file))[c('breaks', 'confint')] 
+breakpoints <- get(load(file))[c('breaks', 'confint')]
 summarizeBreaks(breakpoints)
 }
 \author{

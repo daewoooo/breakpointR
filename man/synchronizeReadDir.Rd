@@ -20,7 +20,7 @@ This function aims to synchronize strand directionality of reads that fall into 
 \examples{
 ## Get some files that you want to load
 exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-files2sync <- list.files(exampleFolder, full.names=TRUE)
+files2sync <- list.files(exampleFolder, full.names=TRUE)[1:2]
 synchronizeReadDir(files2sync)
 }
 \author{

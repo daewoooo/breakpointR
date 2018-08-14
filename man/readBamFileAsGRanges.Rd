@@ -36,7 +36,7 @@ Import aligned reads from a BAM file into a \code{\link{GRanges-class}} object.
 exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Load the file
-gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE, chromosomes='chr22')
 }
 \author{
 David Porubsky, Aaron Taudt, Ashley Sanders

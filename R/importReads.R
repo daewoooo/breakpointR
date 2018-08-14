@@ -20,7 +20,7 @@
 #'exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Load the file
-#'gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE, chromosomes='chr22')
 
 readBamFileAsGRanges <- function(file, bamindex=file, chromosomes=NULL, pairedEndReads=FALSE, min.mapq=10, remove.duplicate.reads=TRUE, pair2frgm=FALSE, filtAlt=FALSE) {
 

@@ -13,16 +13,12 @@
 #' @export
 #' @examples
 #'## Get an example file 
-#'exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Load the file 
-#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
-#'## Calculate deltaW values
-#'dw <- deltaWCalculator(fragments)
-#'## Get significant peaks in deltaW values
-#'breaks <- breakSeekr(dw)
+#'breakpoint.objects <- get(load(exampleFile))
 #'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breaks, fragments)
+#'gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)
 #'
 GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     if (length(breaks)==0) {

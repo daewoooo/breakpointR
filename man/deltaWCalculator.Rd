@@ -22,7 +22,7 @@ This function will calculate deltaWs from a \code{\link{GRanges-class}} object w
 exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Load the file
-fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE, chromosomes='chr22')
 ## Calculate deltaW values
 dw <- deltaWCalculator(fragments)
 

@@ -37,15 +37,16 @@ writeBedFile(index, outputDirectory, fragments = NULL, deltaWs = NULL,
 Write a bedfile from Breakpoint.R files for upload on to UCSC Genome browser
 }
 \examples{
+\dontrun{
 ## Get an example file
-exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
+exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-## Run breakpointR
-brkpts <- runBreakpointr(exampleFile, pairedEndReads=FALSE, chromosomes='chr1')
+## Load the file 
+brkpts <- get(load(exampleFile))
 ## Write results to BED files
 writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragments,
            deltaWs=brkpts$deltas, breakTrack=brkpts$breaks,
-           confidenceIntervals=brkpts$confint)
+           confidenceIntervals=brkpts$confint)}
 }
 \author{
 Ashley Sanders, David Porubsky, Aaron Taudt

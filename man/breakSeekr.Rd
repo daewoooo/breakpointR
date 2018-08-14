@@ -26,9 +26,9 @@ Find breakpoints from deltaWs by localizing significant peaks based on z-score c
 exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Load the file
-gr <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
+fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE, chromosomes='chr22')
 ## Calculate deltaW values
-dw <- deltaWCalculator(gr)
+dw <- deltaWCalculator(fragments)
 ## Get significant peaks in deltaW values
 breaks <- breakSeekr(dw)
 
