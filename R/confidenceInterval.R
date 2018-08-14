@@ -10,19 +10,13 @@
 #' @author Aaron Taudt, David Porubsky
 #' @export
 #' @examples
-#'## Get an example file  
-#'exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
+#'## Get an example file 
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-#'## Load the file
-#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE, chromosomes='chr22')
-#'## Calculate deltaW values
-#'dw <- deltaWCalculator(fragments)
-#'## Get significant peaks in deltaW values
-#'breaks <- breakSeekr(dw)
-#'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breaks, fragments)
+#'## Load the file 
+#'breakpoint.objects <- get(load(exampleFile))
 #'## Calculate confidence intervals of genotyped breakpoints
-#'confint <- confidenceInterval(gbreaks, fragments, background=0.02)
+#'confint <- confidenceInterval(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)
 #'
 confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 
@@ -101,19 +95,13 @@ confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 #' @author Aaron Taudt, David Porubsky
 #' @export
 #' @examples
-#'## Get an example file  
-#'exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
+#'## Get an example file 
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-#'## Load the file
-#'fragments <- readBamFileAsGRanges(exampleFile, pairedEndReads=FALSE)
-#'## Calculate deltaW values
-#'dw <- deltaWCalculator(fragments)
-#'## Get significant peaks in deltaW values
-#'breaks <- breakSeekr(dw)
-#'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breaks, fragments)
+#'## Load the file 
+#'breakpoint.objects <- get(load(exampleFile))
 #'## Calculate confidence intervals of genotyped breakpoints
-#'confint <- confidenceInterval.binomial(gbreaks, fragments, background=0.02)
+#'confint <- confidenceInterval.binomial(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)
 #' 
 confidenceInterval.binomial <- function(breaks, fragments, background=0.02, conf=0.99) {
   
