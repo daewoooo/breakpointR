@@ -20,7 +20,6 @@
 
 plotBreakpoints <- function(files2plot, file=NULL) {
     
-    #if (class(files2plot) == class.breakpoint) {
     if (is(files2plot, class.breakpoint)) {
         numplots <- 1
     } else if (is.character(files2plot)) {
@@ -31,10 +30,8 @@ plotBreakpoints <- function(files2plot, file=NULL) {
   
     plots <- list()
     for (i in 1:numplots) {
-        #if (class(files2plot) == 'character') {
         if (is(files2plot, 'character')) {  
             data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
-        #} else if (class(files2plot) == class.breakpoint) {
         } else if (is(files2plot, class.breakpoint)) {  
             data <- files2plot
         } else {
@@ -231,7 +228,6 @@ plotBreakpoints <- function(files2plot, file=NULL) {
 #'
 plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
-    #if (class(files2plot) == class.breakpoint) {
     if (is(files2plot, class.breakpoint)) {
         stop("Cannot make heatmap from only one object.")
     } else {
@@ -365,7 +361,6 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
 plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) {
 
-    #if (class(files2plot) == class.breakpoint) {
     if (is(files2plot, class.breakpoint)) {  
         numplots <- 1
         chroms.in.data <- GenomeInfoDb::seqlevels(files2plot$fragments)
@@ -396,10 +391,8 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
         dfplot.breaks.chr <- list()
         for (i in 1:numplots) {
         
-            #if (class(files2plot) == 'character') {
             if (is(files2plot, 'character')) {  
               data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
-            #} else if (class(files2plot) == class.breakpoint) {
             } else if (is(files2plot, class.breakpoint)) {  
               data <- files2plot
             } else {

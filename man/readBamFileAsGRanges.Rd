@@ -26,10 +26,10 @@ readBamFileAsGRanges(file, bamindex = file, chromosomes = NULL,
 \item{filtAlt}{Set to \code{TRUE} if you want to filter out alternative alignments defined in 'XA' tag.}
 }
 \value{
-A \code{\link[GenomicRanges]{GRanges}} object.
+A \code{\link{GRanges-class}} object.
 }
 \description{
-Import aligned reads from a BAM file into a \code{\link[GenomicRanges]{GRanges}} object.
+Import aligned reads from a BAM file into a \code{\link{GRanges-class}} object.
 }
 \examples{
 ## Get an example file 
