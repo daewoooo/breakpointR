@@ -21,9 +21,11 @@ Plot a genome-wide heatmap of template inheritance states from a \code{\link{Bre
 }
 \examples{
 ## Get example BreakPoint objects to plot
-data(example_BreakPoints)
+exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+exampleFiles <- list.files(exampleFolder, full.names=TRUE)
+breakpoint.objects <- loadFromFiles(exampleFiles)
 ## Plot the heatmap
-plotHeatmap(example_BreakPoints)
+plotHeatmap(breakpoint.objects)
 
 }
 \author{

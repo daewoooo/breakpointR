@@ -28,7 +28,7 @@ deltaWCalculator <- function(frags, reads.per.window=100) {
         warning("'reads.per.window' should at least be 10")
     }
     frags.split <- split(frags, seqnames(frags))
-    reads.per.chrom <- sapply(frags.split, length)
+    reads.per.chrom <- vapply(frags.split, FUN=length, FUN.VALUE=numeric(1))
     chroms2parse <- names(reads.per.chrom)[reads.per.chrom>2*reads.per.window]
     chroms2skip <- setdiff(names(reads.per.chrom),chroms2parse)
     if (length(chroms2skip)>0) {

@@ -4,9 +4,9 @@
 \alias{createCompositeFile}
 \title{Create composite Strand-seq file}
 \usage{
-createCompositeFile(file.list, chromosomes = NULL, pairedEndReads = TRUE,
-  pair2frgm = FALSE, min.mapq = 10, filtAlt = FALSE, WC.cutoff = 0.9,
-  background = 0.05)
+createCompositeFile(file.list, chromosomes = NULL,
+  pairedEndReads = TRUE, pair2frgm = FALSE, min.mapq = 10,
+  filtAlt = FALSE, WC.cutoff = 0.9, background = 0.05)
 }
 \arguments{
 \item{file.list}{A list of BAM files to process.}

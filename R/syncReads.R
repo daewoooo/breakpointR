@@ -6,6 +6,7 @@
 #' @param collapseWidth A segment size to be collapsed with neighbouring segments.
 #' @return A \code{\link[GenomicRanges]{GRanges}} object that reads synchronized by directionality.
 #' @author David Porubsky
+#' @importFrom S4Vectors endoapply
 #' @export
 #' @examples 
 #'## Get some files that you want to load

@@ -216,12 +216,15 @@ plotBreakpoints <- function(files2plot, file=NULL) {
 #' 
 #' @author David Porubsky, Aaron Taudt, Ashley Sanders
 #' @importFrom grDevices pdf dev.off
+#' @importFrom S4Vectors endoapply
 #' @export
 #' @examples 
 #'## Get example BreakPoint objects to plot
-#'data(example_BreakPoints)
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+#'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
+#'breakpoint.objects <- loadFromFiles(exampleFiles)
 #'## Plot the heatmap
-#'plotHeatmap(example_BreakPoints)
+#'plotHeatmap(breakpoint.objects)
 #'
 plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 

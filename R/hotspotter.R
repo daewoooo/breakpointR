@@ -10,12 +10,15 @@
 #' @return A \code{\link[GenomicRanges]{GRanges}} object containing coordinates of hotspots with p-values.
 #' @author Aaron Taudt
 #' @importFrom stats density runif ecdf
+#' @importFrom S4Vectors endoapply
 #' @export
 #' @examples 
 #'## Get example BreakPoint objects
-#'data(example_BreakPoints)
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+#'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
+#'breakpoint.objects <- loadFromFiles(exampleFiles)
 #'## Extract breakpoint coordinates
-#'breaks <- lapply(example_BreakPoints, '[[', 'breaks')
+#'breaks <- lapply(breakpoint.objects, '[[', 'breaks')
 #'## Get hotspot coordinates
 #'hotspots <- hotspotter(breaks, bw=1e6)
 #'

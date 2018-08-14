@@ -83,13 +83,13 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             counts <- GenomicRanges::countOverlaps(tiles, fragments.chr)
             reads.per.window <- max(10, round(mean(counts[counts>0], trim=0.05)))
           
-            dw <- deltaWCalculator(fragments.chr, reads.per.window=reads.per.window)
+            dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
         } else if (binMethod == "reads") {
             ## normalize only for size of the chromosome 1
             #reads.per.window <- max(10, round(windowsize/(seqlengths(fragments)[1]/seqlengths(fragments)[chr]))) # scales the bin to chr size, anchored to chr1 (249250621 bp)
             ## do not normalize to the size of the chromosome 1
             reads.per.window <- windowsize 
-            dw <- deltaWCalculator(fragments.chr, reads.per.window=reads.per.window)
+            dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
         }
         deltaWs <- dw[seqnames(dw)==chr]
         stopTimedMessage(ptm)
@@ -104,7 +104,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             iter <- 1
             ptm <- startTimedMessage("    genotyping ",iter, " ...")
             utils::flush.console()
-            newBreaks <- GenotypeBreaks(breaks, fragments, background=background, minReads=minReads)
+            newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads)
             prev.breaks <- breaks  
             breaks <- newBreaks
             stopTimedMessage(ptm)
@@ -113,7 +113,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
                 utils::flush.console()
                 iter <- iter + 1
                 ptm <- startTimedMessage("    genotyping ",iter, " ...")
-                newBreaks <- GenotypeBreaks(breaks, fragments, background=background, minReads=minReads)
+                newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads)
                 prev.breaks <- breaks  
                 breaks <- newBreaks
                 stopTimedMessage(ptm)
@@ -202,7 +202,6 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     }
     
     ## creating list of list where filename is first level list ID and deltas, breaks and counts are second list IDs
-    reads.all.chroms <- unlist(reads.all.chroms, use.names=FALSE)  
     deltas.all.chroms <- unlist(deltas.all.chroms, use.names=FALSE)
     breaks.all.chroms <- unlist(breaks.all.chroms, use.names=FALSE)
     confint.all.chroms <- unlist(confint.all.chroms, use.names=FALSE)

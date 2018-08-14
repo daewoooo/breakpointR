@@ -5,8 +5,9 @@
 \title{Generates a bedfile from inFile}
 \usage{
 writeBedFile(index, outputDirectory, fragments = NULL, deltaWs = NULL,
-  breakTrack = NULL, confidenceIntervals = NULL, maskedRegions = NULL,
-  hotspots = NULL, breaksGraph = NULL, col = "103,139,139 243,165,97")
+  breakTrack = NULL, confidenceIntervals = NULL,
+  maskedRegions = NULL, hotspots = NULL, breaksGraph = NULL,
+  col = "103,139,139 243,165,97")
 }
 \arguments{
 \item{index}{A character used to name the bedfile(s).}

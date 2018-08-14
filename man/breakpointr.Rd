@@ -5,11 +5,11 @@
 \title{Main function for the \pkg{\link{breakpointR}} package}
 \usage{
 breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
-  reuse.existing.files = FALSE, windowsize = 1e+06, binMethod = "size",
-  pairedEndReads = FALSE, pair2frgm = FALSE, chromosomes = NULL,
-  min.mapq = 10, filtAlt = FALSE, trim = 10, peakTh = 0.33,
-  zlim = 3.291, background = 0.05, minReads = 10, maskRegions = NULL,
-  callHotSpots = FALSE, conf = 0.99)
+  reuse.existing.files = FALSE, windowsize = 1e+06,
+  binMethod = "size", pairedEndReads = FALSE, pair2frgm = FALSE,
+  chromosomes = NULL, min.mapq = 10, filtAlt = FALSE, trim = 10,
+  peakTh = 0.33, zlim = 3.291, background = 0.05, minReads = 10,
+  maskRegions = NULL, callHotSpots = FALSE, conf = 0.99)
 }
 \arguments{
 \item{inputfolder}{Folder with BAM files.}

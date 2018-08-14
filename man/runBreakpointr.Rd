@@ -5,10 +5,10 @@
 \title{Find breakpoints in Strand-seq data}
 \usage{
 runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
-  chromosomes = NULL, windowsize = 1e+06, binMethod = "size", trim = 10,
-  peakTh = 0.33, zlim = 3.291, background = 0.05, min.mapq = 10,
-  pair2frgm = FALSE, filtAlt = FALSE, minReads = 20, maskRegions = NULL,
-  conf = 0.99)
+  chromosomes = NULL, windowsize = 1e+06, binMethod = "size",
+  trim = 10, peakTh = 0.33, zlim = 3.291, background = 0.05,
+  min.mapq = 10, pair2frgm = FALSE, filtAlt = FALSE, minReads = 20,
+  maskRegions = NULL, conf = 0.99)
 }
 \arguments{
 \item{bamfile}{A file with aligned reads in BAM format.}

@@ -24,9 +24,11 @@ The hotspotter uses \code{\link[stats]{density}} to perform a KDE. A p-value is 
 }
 \examples{
 ## Get example BreakPoint objects
-data(example_BreakPoints)
+exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+exampleFiles <- list.files(exampleFolder, full.names=TRUE)
+breakpoint.objects <- loadFromFiles(exampleFiles)
 ## Extract breakpoint coordinates
-breaks <- lapply(example_BreakPoints, '[[', 'breaks')
+breaks <- lapply(breakpoint.objects, '[[', 'breaks')
 ## Get hotspot coordinates
 hotspots <- hotspotter(breaks, bw=1e6)
 

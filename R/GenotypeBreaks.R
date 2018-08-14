@@ -9,6 +9,7 @@
 #' @return A \code{\link[GenomicRanges]{GRanges}} object with genotyped breakpoint coordinates.
 #' @author David Porubsky, Ashley Sanders, Aaron Taudt
 #' @importFrom stats fisher.test
+#' @importFrom S4Vectors endoapply
 #' @export
 #' @examples
 #'## Get an example file 
@@ -23,8 +24,7 @@
 #'## Genotype regions between breakpoints
 #'gbreaks <- GenotypeBreaks(breaks, fragments)
 #'
-GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10)
-{
+GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     if (length(breaks)==0) {
         stop("argument 'breaks' is empty")
     }
@@ -50,7 +50,8 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10)
         breakrange$readNo <- breakrange$Ws + breakrange$Cs
         
         ## bestFit genotype each region by Fisher Exact test
-        fisher <- sapply(1:length(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], background=background, minReads=minReads))
+        fisher <- lapply(1:length(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], background=background, minReads=minReads))
+        fisher <- do.call(cbind, fisher)
       
         breakrange$genoT <- unlist(fisher[1,])
         breakrange$pVal <- unlist(fisher[2,])
@@ -81,7 +82,6 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10)
     } else {
         return(breakrange.new<-NULL)
     }  
-    
 }
 
 

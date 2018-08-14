@@ -12,18 +12,3 @@
 #'
 #' @seealso runBreakpointr
 NULL
-
-
-#' BreakPoint objects for demonstration purposes
-#'
-#' A list of \code{\link{BreakPoint}} objects for demonstration purposes in examples of package \pkg{\link{breakpointR}}.
-#'
-#' @docType data
-#' @name example_BreakPoints
-#' @format A list with \code{\link{BreakPoint}} objects.
-#' @examples
-#'data(example_BreakPoints)
-#'length(example_BreakPoints)
-#'## Have a look at the first object
-#'example_BreakPoints[[1]]
-NULL
