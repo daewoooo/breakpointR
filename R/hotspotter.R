@@ -8,19 +8,9 @@
 #' @param bw Bandwidth used for kernel density estimation (see \code{\link[stats]{density}}).
 #' @param pval P-value cutoff for hotspots.
 #' @return A \code{\link{GRanges-class}} object containing coordinates of hotspots with p-values.
-#' @author Aaron Taudt
 #' @importFrom stats density runif ecdf
 #' @importFrom S4Vectors endoapply
-#' @export
-#' @examples 
-#'## Get example BreakPoint objects
-#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-#'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
-#'breakpoint.objects <- loadFromFiles(exampleFiles)
-#'## Extract breakpoint coordinates
-#'breaks <- lapply(breakpoint.objects, '[[', 'breaks')
-#'## Get hotspot coordinates
-#'hotspots <- hotspotter(breaks, bw=1e6)
+#' @author Aaron Taudt
 #'
 hotspotter <- function(gr.list, bw, pval=1e-8) {
 

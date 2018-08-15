@@ -33,14 +33,6 @@ This function will move through BAM files in a folder, read in each individual f
 determine if the chromosome is WW or CC based on WCcutoff, reverse complement all reads in the WW file,
 append to a new composite file for that chromosome, order the composite file of each chromosome based on position.
 }
-\examples{
-## Get some example files
-inputfolder <- system.file("extdata", "example_bams", package="breakpointRdata")
-files <- list.files(inputfolder, full.names=TRUE, pattern="bam$")
-## Create the composite file
-composite <- createCompositeFile(files, chromosomes='chr22', pairedEndReads=FALSE)
-                   
-}
 \author{
 Ashley Sanders, David Porubsky
 }

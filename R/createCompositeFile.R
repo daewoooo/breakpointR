@@ -13,13 +13,6 @@
 #' @importFrom BiocGenerics table
 #' @import GenomicRanges
 #' @author Ashley Sanders, David Porubsky
-#' @export
-#' @examples
-#'## Get some example files
-#'inputfolder <- system.file("extdata", "example_bams", package="breakpointRdata")
-#'files <- list.files(inputfolder, full.names=TRUE, pattern="bam$")
-#'## Create the composite file
-#'composite <- createCompositeFile(files, chromosomes='chr22', pairedEndReads=FALSE)
 #'                    
 createCompositeFile <- function(file.list, chromosomes=NULL, pairedEndReads=TRUE, pair2frgm=FALSE, min.mapq=10, filtAlt=FALSE, WC.cutoff=0.90, background=0.05) {
 

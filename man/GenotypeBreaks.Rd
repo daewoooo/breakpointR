@@ -21,16 +21,6 @@ A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
 \description{
 Genotype the space between breakpoints with Fisher's exact test.
 }
-\examples{
-## Get an example file 
-exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-## Load the file 
-breakpoint.objects <- get(load(exampleFile))
-## Genotype regions between breakpoints
-gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)
-
-}
 \author{
 David Porubsky, Ashley Sanders, Aaron Taudt
 }

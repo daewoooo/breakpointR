@@ -166,5 +166,4 @@ confidenceInterval.binomial <- function(breaks, fragments, background=0.02, conf
     }
     breaks.conf <- unlist(breaks.conf, use.names = FALSE)
     return(breaks.conf)
-  
 }

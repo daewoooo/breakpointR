@@ -7,18 +7,9 @@
 #' @param background The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.
 #' @param minReads The minimal number of reads between two breaks required for genotyping.
 #' @return A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
-#' @author David Porubsky, Ashley Sanders, Aaron Taudt
 #' @importFrom stats fisher.test
 #' @importFrom S4Vectors endoapply
-#' @export
-#' @examples
-#'## Get an example file 
-#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-#'## Load the file 
-#'breakpoint.objects <- get(load(exampleFile))
-#'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)
+#' @author David Porubsky, Ashley Sanders, Aaron Taudt
 #'
 GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     if (length(breaks)==0) {
