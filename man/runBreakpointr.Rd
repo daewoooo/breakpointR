@@ -60,11 +60,12 @@ Breakpoints are located in the following way:
 }
 }
 \examples{
+\dontrun{ 
 ## Get an example file
 exampleFolder <- system.file("extdata", "example_bams", package="breakpointRdata")
 exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 ## Run breakpointR
-brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)
+brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)}
 
 }
 \author{

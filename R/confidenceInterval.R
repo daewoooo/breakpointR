@@ -8,6 +8,16 @@
 #' @inheritParams GenotypeBreaks
 #' @return A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 #' @author Aaron Taudt, David Porubsky
+#' @export
+#' @examples
+#'\dontrun{ 
+#'## Get an example file 
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Load the file 
+#'breakpoint.objects <- get(load(exampleFile))
+#'## Calculate confidence intervals of genotyped breakpoints
+#'confint <- confidenceInterval(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)}
 #'
 confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 
@@ -84,6 +94,16 @@ confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 #' @inheritParams GenotypeBreaks
 #' @return A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 #' @author Aaron Taudt, David Porubsky
+#' @export
+#' @examples
+#'\dontrun{ 
+#'## Get an example file 
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+#'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Load the file 
+#'breakpoint.objects <- get(load(exampleFile))
+#'## Calculate confidence intervals of genotyped breakpoints
+#'confint <- confidenceInterval.binomial(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)}
 #' 
 confidenceInterval.binomial <- function(breaks, fragments, background=0.02, conf=0.99) {
   

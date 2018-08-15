@@ -21,6 +21,17 @@ A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence
 \description{
 Estimate confidence intervals for breakpoints by going outwards from the breakpoint read by read, and multiplying the probability that the read doesn't belong to the assigned segment.
 }
+\examples{
+\dontrun{ 
+## Get an example file 
+exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
+## Load the file 
+breakpoint.objects <- get(load(exampleFile))
+## Calculate confidence intervals of genotyped breakpoints
+confint <- confidenceInterval(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)}
+
+}
 \author{
 Aaron Taudt, David Porubsky
 }
