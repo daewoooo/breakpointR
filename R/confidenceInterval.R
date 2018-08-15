@@ -8,7 +8,6 @@
 #' @inheritParams GenotypeBreaks
 #' @return A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 #' @author Aaron Taudt, David Porubsky
-#' @export
 #' @examples
 #'\dontrun{ 
 #'## Get an example file 
@@ -94,7 +93,6 @@ confidenceInterval <- function(breaks, fragments, background=0.05, conf=0.99) {
 #' @inheritParams GenotypeBreaks
 #' @return A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence interval in \code{conf}.
 #' @author Aaron Taudt, David Porubsky
-#' @export
 #' @examples
 #'\dontrun{ 
 #'## Get an example file 

@@ -12,14 +12,13 @@
 #' @importFrom S4Vectors endoapply
 #' @export
 #' @examples
-#'\dontrun{ 
 #'## Get an example file 
 #'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Load the file 
 #'breakpoint.objects <- get(load(exampleFile))
 #'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)}
+#'gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)
 #'
 GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     if (length(breaks)==0) {

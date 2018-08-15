@@ -17,16 +17,13 @@
 #' @importFrom utils write.table
 #' @export
 #' @examples
-#'\dontrun{
 #'## Get an example file
 #'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Load the file 
 #'brkpts <- get(load(exampleFile))
 #'## Write results to BED files
-#'writeBedFile(index='testfile', outputDirectory=tempdir(), fragments=brkpts$fragments,
-#'            deltaWs=brkpts$deltas, breakTrack=brkpts$breaks,
-#'            confidenceIntervals=brkpts$confint)}
+#'writeBedFile(index='testfile', outputDirectory=tempdir(), breakTrack=brkpts$breaks)
          
 writeBedFile <- function(index, outputDirectory, fragments=NULL, deltaWs=NULL, breakTrack=NULL, confidenceIntervals=NULL, maskedRegions=NULL, hotspots=NULL, breaksGraph=NULL, col="103,139,139 243,165,97") {
   

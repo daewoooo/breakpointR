@@ -3,8 +3,6 @@
 export(GenotypeBreaks)
 export(breakSeekr)
 export(breakpointr)
-export(confidenceInterval)
-export(confidenceInterval.binomial)
 export(deltaWCalculator)
 export(exportRegions)
 export(loadFromFiles)
