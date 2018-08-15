@@ -5,15 +5,9 @@
 #' @param files2sync A list of files that contains \code{\link{BreakPoint}} objects.
 #' @param collapseWidth A segment size to be collapsed with neighbouring segments.
 #' @return A \code{\link{GRanges-class}} object that reads synchronized by directionality.
-#' @author David Porubsky
 #' @importFrom S4Vectors endoapply
-#' @export
-#' @examples 
-#'## Get some files that you want to load
-#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-#'files2sync <- list.files(exampleFolder, full.names=TRUE)[1:2]
-#'synchronizeReadDir(files2sync)
-
+#' @author David Porubsky
+#' 
 synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
   
     ## helper functions

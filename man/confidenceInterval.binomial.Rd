@@ -22,16 +22,6 @@ A \code{\link{GRanges-class}} object of breakpoint ranges for a given confidence
 \description{
 Estimate confidence intervals for breakpoints by going outwards from the breakpoint read by read, and performing a binomial test of getting the observed or a more extreme outcome, given that the reads within the confidence interval belong to the other side of the breakpoint.
 }
-\examples{
-## Get an example file 
-exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
-exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
-## Load the file 
-breakpoint.objects <- get(load(exampleFile))
-## Calculate confidence intervals of genotyped breakpoints
-confint <- confidenceInterval.binomial(breakpoint.objects$breaks, breakpoint.objects$fragments, background=0.02)
-
-}
 \author{
 Aaron Taudt, David Porubsky
 }
