@@ -9,12 +9,11 @@
 #' @author David Porubsky
 #' @export
 #' @examples
-#'
 #'## Get some files that you want to load
 #'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'files2sync <- list.files(exampleFolder, full.names=TRUE)[1]
-#'synchronizeReadDir(files2sync)
-
+#'synchronizeReadDir(files2sync=files2sync)
+#'
 synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
   
     ## helper functions
@@ -32,26 +31,16 @@ synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
         }
     }
     
-    #collapese consecutive bins with the same ID value
-    collapseBins <- function(gr, id.field=3) {
-        ind.last <- cumsum(S4Vectors::runLength(S4Vectors::Rle(mcols(gr)[,id.field]))) ##get indices of last range in a consecutive(RLE) run of the same value
-        ind.first <- c(1,cumsum(S4Vectors::runLength(S4Vectors::Rle(mcols(gr)[,id.field]))) + 1) ##get indices of first range in a consecutive(RLE) run of the same value
-        ind.first <- ind.first[-length(ind.first)]  ##erase last index from first range indices 
-        collapsed.gr <- GenomicRanges::GRanges(seqnames=seqnames(gr[ind.first]), ranges=IRanges(start=start(gr[ind.first]), end=end(gr[ind.last])), mcols=mcols(gr[ind.first]))
-        names(mcols(collapsed.gr)) <- names(mcols(gr[ind.first]))
-        return(collapsed.gr)
-    }
-    
     ptm <- startTimedMessage("Synchronizing read directionality ...")
 
     ## load data of class BreakPoint
     data <- loadFromFiles(files2sync)
 
     allLibs.syncReads <- GenomicRanges::GRangesList()
-    for (i in 1:length(data)) {
+    for (i in seq_along(data)) {
         lib.results <- data[[i]]
         region.counts <- lib.results$counts
-        ## collapse regions smaller collapseWidth
+        ## collapse regions smaller than collapseWidth
         #get index of each region smaller than collapseWidth
         indexes <- which(width(region.counts) < collapseWidth)
         #collapse regions flanked by the same state

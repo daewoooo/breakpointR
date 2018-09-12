@@ -63,15 +63,25 @@ callHotSpots=TRUE
 \item \textbf{data} Contains RData files storing results of BreakpointR analysis for each single-cell library.
 \item \textbf{plots}: Genome-wide plots for selected chromsosome, genome-wide heatmap of strand states as well as chromosome specific read distribution together with localized breakpoints. All plots are created by default.
 
-<<eval=FALSE>>==
-## Eventually plots can be created from stored results.
-files2plot <- list.files('output-directory/data/', full.names=TRUE)
-breakpoint.plots <- plotBreakpoints(files2plot)
-breakpointPerChr.plots <- plotBreakpointsPerChr(files2plot)
-genome.heatmap <- plotHeatmap(files2plot)
-@
-
 \end{itemize}
+
+\subsection{Running breakpointR}
+The function \Rfunction{breakpointr()} takes an input BAM files stored in the inputfolder and produces an output folder with results, plots and browserfiles. The following code is an example of how to run \Rpackage{breakpointR} for single-end reads with windowsize defined by size. Results will be stored in \textbf{outputfolder/data} as RData objects. Such data can be later loaded for further processing and customized plotting.
+
+<<eval=TRUE, message=FALSE>>==
+library(breakpointR)
+
+## Get some example files
+datafolder <- system.file("extdata", "example_bams", package="breakpointRdata")
+outputfolder <- tempdir()
+## Run breakpointR
+breakpointr(inputfolder = datafolder, outputfolder = outputfolder, 
+            chromosomes = 'chr22', pairedEndReads = FALSE,
+            reuse.existing.files = FALSE, windowsize = 1000000, 
+            binMethod = 'size', pair2frgm = FALSE, min.mapq = 10, 
+            filtAlt = TRUE)
+
+@
 
 \newpage
 
@@ -79,10 +89,10 @@ genome.heatmap <- plotHeatmap(files2plot)
 
 \subsection{Reading BAM files}
 
-Currently \Rpackage{breakpointR} can take as an input only aligned reads stored in BAM files. All BAM files are expected to be present in a folder specified in \Rfunction{breakpointr(..., inputfolder)}. We advise to remove reads with low mapping quality. Duplicated reads are removed by default. 
+Currently \Rpackage{breakpointR} can take as an input only aligned reads stored in BAM files. All BAM files are expected to be present in a folder specified in \Rfunction{breakpointr(..., inputfolder)}. We advise to remove reads with low mapping qualityand reads with alternative alignments. Duplicated reads are removed by default (to keep them .
 
 <<eval=FALSE>>==
-breakpointr(..., min.mapq=10)
+breakpointr(..., min.mapq = 10, filtAlt = TRUE)
 @
 
 \subsection{\label{subsec:maskregions}Removing certain regions}
@@ -128,7 +138,20 @@ Backround reads are a common feature of Strand-seq libraries. Strand-seq is base
 In order to find locations where breakpoints occur around the same genomic position in multiple Strand-seq libraries there is \Rfunction{hotspotter()}. Function can be invoked by setting corresponding parameter to 'TRUE'. It make sense to set this parameter only if there is available a reasonable number ($>$=50) of Strand-seq libraries.
 
 <<eval=FALSE>>==
+## To run breakpoint hotspot analysis using the main breakpointR function
 breakpointr(..., callHotSpots=TRUE)
+@
+
+<<eval=TRUE, message=FALSE>>==
+## To run breakpoint hotspot analysis using exported data
+exampleFolder <- system.file("extdata", "example_results", 
+                             package="breakpointRdata")
+exampleFiles <- list.files(exampleFolder, full.names=TRUE)
+breakpoint.objects <- loadFromFiles(exampleFiles)
+## Extract breakpoint coordinates
+breaks <- lapply(breakpoint.objects, '[[', 'breaks')
+## Get hotspot coordinates
+hotspots <- hotspotter(breaks, bw=1e6)
 @
 
 \subsection{Loading results and plotting single cells}

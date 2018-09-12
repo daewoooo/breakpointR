@@ -1,16 +1,13 @@
-#' Genotype the space between breakpoints
+#' Set of functions to genotype regions in between localized breakpoints
 #'
-#' Genotype the space between breakpoints with Fisher's exact test.
+#' Each defined region is given one of the three states ('ww', 'cc' or 'wc')
+#' Consecutive regions with the same state are collapsed
 #'
-#' @param breaks A \code{\link{GRanges-class}} object with breakpoint coordinates.
-#' @param fragments A \code{\link{GRanges-class}} object with read fragments.
-#' @param background The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.
-#' @param minReads The minimal number of reads between two breaks required for genotyping.
-#' @return A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
+#' Function \code{GenotypeBreaks} exports states of each region defined by breakpoints.
+#' Function \code{genotype.fisher} assigns states to each region based on expected counts of Watson and Crick reads.
+#'
+#' @name genotyping
 #' @author David Porubsky, Ashley Sanders, Aaron Taudt
-#' @importFrom stats fisher.test
-#' @importFrom S4Vectors endoapply
-#' @export
 #' @examples
 #'## Get an example file 
 #'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
@@ -18,8 +15,35 @@
 #'## Load the file 
 #'breakpoint.objects <- get(load(exampleFile))
 #'## Genotype regions between breakpoints
-#'gbreaks <- GenotypeBreaks(breakpoint.objects$breaks, breakpoint.objects$fragments)
+#'gbreaks <- GenotypeBreaks(breaks=breakpoint.objects$breaks, fragments=breakpoint.objects$fragments)
 #'
+NULL
+
+## Helper functions ##
+## Refine breakpoint regions to the highest deltaW in a given region
+mergeGR <- function(gr) {
+  gr <- sort(gr)
+  new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=min(start(gr)), end=max(end(gr))))
+  return(new.gr)
+}
+
+RefineBreaks <- function(gr) {
+  maxDeltaW <- max(gr$deltaW)
+  new.gr <- gr[gr$deltaW == maxDeltaW]
+  new.gr <- mergeGR(new.gr)
+  new.gr$deltaW <- maxDeltaW
+  return(new.gr)
+}
+
+#' @describeIn genotyping Genotypes breakpoint defined regions.
+#' @param breaks A \code{\link{GRanges-class}} object with breakpoint coordinates.
+#' @param fragments A \code{\link{GRanges-class}} object with read fragments.
+#' @param background The percent (e.g. 0.05 = 5\%) of background reads allowed for WW or CC genotype calls.
+#' @param minReads The minimal number of reads between two breaks required for genotyping.
+#' @return A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
+#' @importFrom stats fisher.test
+#' @importFrom S4Vectors endoapply
+#' @export
 GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     if (length(breaks)==0) {
         stop("argument 'breaks' is empty")
@@ -46,7 +70,7 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
         breakrange$readNo <- breakrange$Ws + breakrange$Cs
         
         ## bestFit genotype each region by Fisher Exact test
-        fisher <- lapply(1:length(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], background=background, minReads=minReads))
+        fisher <- lapply(seq_along(breakrange), function(x) genotype.fisher(cReads=breakrange$Cs[x], wReads=breakrange$Ws[x], roiReads=breakrange$readNo[x], background=background, minReads=minReads))
         fisher <- do.call(cbind, fisher)
       
         breakrange$genoT <- unlist(fisher[1,])
@@ -80,18 +104,12 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10) {
     }  
 }
 
-
-#' Genotype read numbers
-#'
-#' Genotype read numbers with Fisher's exact test.
-#' 
+#' @describeIn genotyping Assign states to any given region.
 #' @param cReads Number of Crick reads.
 #' @param wReads Number of Watson reads.
 #' @param roiReads Total number of reads.
-#' @param background Parameter for frequency of background reads.
-#' @param minReads Minimal number of reads to perform the test.
-#' @return A list with the $bestFit and $pval.
-#' @author Ashley Sanders, David Porubsky, Aaron Taudt
+#' @inheritParams GenotypeBreaks
+#' @return A \code{list} with the $bestFit and $pval.
 #' 
 genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=10) {
     ## FISHER EXACT TEST
@@ -117,23 +135,4 @@ genotype.fisher <- function(cReads, wReads, roiReads, background=0.02, minReads=
     } else { 
         return(result)
     }
-}  
-
-####################
-# Helper functions #
-####################
-
-RefineBreaks <- function(gr) {
-    maxDeltaW <- max(gr$deltaW)
-    new.gr <- gr[gr$deltaW == maxDeltaW]
-    new.gr <- mergeGR(new.gr)
-    new.gr$deltaW <- maxDeltaW
-    return(new.gr)
-}
-
-mergeGR <- function(gr) {
-    gr <- sort(gr)
-    #new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=start(gr[1]), end=end(gr[length(gr)])))
-    new.gr <- GRanges(seqnames=as.character(seqnames(gr))[1], ranges=IRanges(start=min(start(gr)), end=max(end(gr))))
-    return(new.gr)
 }

@@ -16,7 +16,7 @@
 #'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
 #'exampleFile <- list.files(exampleFolder, full.names=TRUE)[1]
 #'## Plot the file
-#'plotBreakpoints(exampleFile)
+#'plotBreakpoints(files2plot=exampleFile)
 
 plotBreakpoints <- function(files2plot, file=NULL) {
     
@@ -29,7 +29,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
     }
   
     plots <- list()
-    for (i in 1:numplots) {
+    for (i in seq_len(numplots)) {
         if (is(files2plot, 'character')) {  
             data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
         } else if (is(files2plot, class.breakpoint)) {  
@@ -239,7 +239,7 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
     IDs <- list()
     grl <- GRangesList()
     breaks <- GRangesList()
-    for (i in 1:numlibs2plot) {  
+    for (i in seq_len(numlibs2plot)) {  
         data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)
         IDs[[i]] <- data[[1]]$ID
         grl[[i]] <- data[[1]]$counts
@@ -291,7 +291,7 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
     
     # Data
     df <- list()
-    for (i1 in 1:length(grl)) {
+    for (i1 in seq_along(grl)) {
         df[[length(df)+1]] <- data.frame(start=grl[[i1]]$start.genome, end=grl[[i1]]$end.genome, seqnames=seqnames(grl[[i1]]), sample=IDs[[i1]], state=grl[[i1]]$states)
     }
     df <- do.call(rbind, df)
@@ -389,7 +389,7 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
     
         dfplot.reads.chr <- list()
         dfplot.breaks.chr <- list()
-        for (i in 1:numplots) {
+        for (i in seq_len(numplots)) {
         
             if (is(files2plot, 'character')) {  
               data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
@@ -486,20 +486,4 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
         stopTimedMessage(ptm)
     }
     return(plots)
-}  
-
-  
-#' Transform genomic coordinates
-#'
-#' Add two columns with transformed genomic coordinates to the \code{\link{GRanges-class}} object. This is useful for making genomewide plots.
-#'
-#' @param gr A \code{\link{GRanges-class}} object.
-#' @return The input \code{\link{GRanges-class}} with two additional metadata columns 'start.genome' and 'end.genome'.
-transCoord <- function(gr) {
-    cum.seqlengths <- cumsum(as.numeric(seqlengths(gr)))
-    cum.seqlengths.0 <- c(0,cum.seqlengths[-length(cum.seqlengths)])
-    names(cum.seqlengths.0) <- GenomeInfoDb::seqlevels(gr)
-    gr$start.genome <- start(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
-    gr$end.genome <- end(gr) + cum.seqlengths.0[as.character(seqnames(gr))]
-    return(gr)
 }

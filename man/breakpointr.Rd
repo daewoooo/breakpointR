@@ -65,5 +65,5 @@ breakpointr(inputfolder="my-data-folder", outputfolder="my-output-folder")}
 
 }
 \author{
-Aaron Taudt, David Porubsky, Ashley Sanders
+David Porubsky, Aaron Taudt, Ashley Sanders
 }
