@@ -107,11 +107,10 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         
         #construct ggplot
         dfplot.reads$mCrickreads <- -dfplot.reads$Crickreads
-        ggplt1 <- ggplot(dfplot.reads)
-        ggplt1 <- ggplt1 + geom_linerange(aes_string(ymin=0, ymax='mCrickreads', x='midpoint'), color="paleturquoise4", size=0.2)
-        ggplt1 <- ggplt1 + geom_linerange(aes_string(ymin=0, ymax='Watsonreads', x='midpoint'), color="sandybrown", size=0.2)
-        ggplt1 <- ggplt1 + geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') + xlab(NULL)
-        ggplt1 <- ggplt1 + 
+        ggplt1 <- ggplot(dfplot.reads) +
+            geom_linerange(aes_string(ymin=0, ymax='mCrickreads', x='midpoint'), color="paleturquoise4", size=0.2) +
+            geom_linerange(aes_string(ymin=0, ymax='Watsonreads', x='midpoint'), color="sandybrown", size=0.2) +
+            geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') + xlab(NULL) +
             ylab("Read counts") +
             scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) +
             theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
@@ -146,13 +145,13 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         #get midpoint values for each breakpoint
         dfplot.breaks$midpoint <- dfplot.breaks$start.genome + ( (dfplot.breaks$end.genome - dfplot.breaks$start.genome) %/% 2)
         
-        ggplt2 <- ggplot(dfplot.counts)
-        ggplt2 <- ggplt2 + geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand'))
-        ggplt2 <- ggplt2 + geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black')
-        ggplt2 <- ggplt2 + scale_fill_manual(values=c("sandybrown","paleturquoise4"))
+        ggplt2 <- ggplot(dfplot.counts) +
+            geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand')) +
+            geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') +
+            scale_fill_manual(values=c("sandybrown","paleturquoise4"))
         if (nrow(dfplot.breaks) > 0) {
-            ggplt2 <- ggplt2 + geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE)
-            ggplt2 <- ggplt2 +
+            ggplt2 <- ggplt2 + 
+                geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) +
                 xlab(NULL) +
                 ylab("Breaks") +
                 scale_x_continuous(expand = c(0,0)) +
@@ -169,10 +168,9 @@ plotBreakpoints <- function(files2plot, file=NULL) {
             
         ### PLOT STATES
         
-        ggplt3 <- ggplot(dfplot.counts)
-        ggplt3 <- ggplt3 + geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax=10, fill='states'))
-        ggplt3 <- ggplt3 + geom_linerange(data=chr.lines, aes_string(ymin=0, ymax=10, x='y'), col='black')
-        ggplt3 <- ggplt3 + 
+        ggplt3 <- ggplot(dfplot.counts) +
+            geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax=10, fill='states')) +
+            geom_linerange(data=chr.lines, aes_string(ymin=0, ymax=10, x='y'), col='black') +
             xlab("Chromosomes") +
             ylab("States") +
             scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) +
@@ -281,13 +279,13 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
     )
 
     # Plot breaks summary
-    ggplt1 <- ggplot(dfplot.disjoin.breaks)
-    ggplt1 <- ggplt1 + geom_rect(aes_string(ymin=0, ymax='hits', xmin='start.genome', xmax='end.genome'), fill="red", color="red")
-    ggplt1 <- ggplt1 + geom_vline(aes_string(xintercept='y'), data=df.chroms, col='black')
-    ggplt1 <- ggplt1 + 
-        scale_y_continuous(expand = c(0,0)) +
-        ylab("Break\ncounts") +
-        my_theme
+    #ggplt1 <- ggplot(dfplot.disjoin.breaks)
+    #ggplt1 <- ggplt1 + geom_rect(aes_string(ymin=0, ymax='hits', xmin='start.genome', xmax='end.genome'), fill="red", color="red")
+    #ggplt1 <- ggplt1 + geom_vline(aes_string(xintercept='y'), data=df.chroms, col='black')
+    #ggplt1 <- ggplt1 + 
+    #    scale_y_continuous(expand = c(0,0)) +
+    #    ylab("Break\ncounts") +
+    #    my_theme
     
     # Data
     df <- list()
@@ -298,27 +296,25 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 
     ## PLOT
     if (is.null(hotspots)) {
-        ggplt2 <- ggplot(df)
-        ggplt2 <- ggplt2 + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5)
-        ggplt2 <- ggplt2 +
+        ggplt2 <- ggplot(df) +
+            geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) +
             scale_y_continuous(breaks=label.pos, labels=names(label.pos), expand=c(0,0)) +
             coord_flip() +
             scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) +
-            theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
-        ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
+            theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20)) +
+            geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black')
     } else {
         hotspots.trans <- transCoord(hotspots)
         hotspot.midpoint <- hotspots.trans$start.genome + (hotspots.trans$end.genome - hotspots.trans$start.genome)/2
         hotspot.midpoint <- data.frame(y=hotspot.midpoint)
-        ggplt2 <- ggplot(df)
-        ggplt2 <- ggplt2 + geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5)
-        ggplt2 <- ggplt2 +
+        ggplt2 <- ggplot(df) +
+            geom_linerange(aes_string(ymin='start', ymax='end', x='sample', col='state'), size=5) +
             scale_y_continuous(breaks=label.pos, labels=names(label.pos)) +
             coord_flip() +
             scale_color_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) +
-            theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20))
-        ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black') 
-        ggplt2 <- ggplt2 + geom_hline(aes_string(yintercept='y'), data=hotspot.midpoint, col='red', alpha=0.5)
+            theme(panel.background=element_blank(), axis.ticks.x=element_blank(), axis.text.x=element_text(size=20)) +
+            geom_hline(aes_string(yintercept='y'), data=df.chroms, col='black') +
+            geom_hline(aes_string(yintercept='y'), data=hotspot.midpoint, col='red', alpha=0.5)
     }  
     stopTimedMessage(ptm)
     
@@ -458,21 +454,22 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
     
         #construct ggplot
         dfplot.reads.chr$mCrickreads <- -dfplot.reads.chr$Crickreads
-        ggplt <- ggplot(dfplot.reads.chr)
-        ggplt <- ggplt + geom_linerange(aes_string(ymin=0, ymax='mCrickreads', x='midpoint'), color="paleturquoise4", size=1)
-        ggplt <- ggplt + facet_wrap(ID ~ seqnames, scales = "free", ncol=1)
-        ggplt <- ggplt + geom_linerange(aes_string(ymin=0, ymax='Watsonreads', x='midpoint'), color="sandybrown", size=1)
-        ggplt <- ggplt +
+        ggplt <- ggplot(dfplot.reads.chr) +
+            geom_linerange(aes_string(ymin=0, ymax='mCrickreads', x='midpoint'), color="paleturquoise4", size=1) +
+            facet_wrap(ID ~ seqnames, scales = "free", ncol=1) +
+            geom_linerange(aes_string(ymin=0, ymax='Watsonreads', x='midpoint'), color="sandybrown", size=1) +
             xlab("Genomic position") +
             ylab("Read counts") +
             scale_x_continuous(expand = c(0,0))
         if (!is.null(dfplot.breaks.chr)) {
             #get midpoint values for each genomic bin
             dfplot.breaks.chr$midpoint <- dfplot.breaks.chr$start + ( (dfplot.breaks.chr$end - dfplot.breaks.chr$start) %/% 2)
-            ggplt <- ggplt + geom_linerange(data=dfplot.breaks.chr, aes_string(ymin=-Inf, ymax=Inf, x='midpoint'), col='black')
-            ggplt <- ggplt + facet_wrap(ID ~ seqnames, scales = "free", ncol=1) + my_theme
+            ggplt <- ggplt +
+                geom_linerange(data=dfplot.breaks.chr, aes_string(ymin=-Inf, ymax=Inf, x='midpoint'), col='black') +
+                facet_wrap(ID ~ seqnames, scales = "free", ncol=1) + my_theme
         } else {
-            ggplt <- ggplt + facet_wrap(ID ~ seqnames, scales = "free", ncol=1) + my_theme
+            ggplt <- ggplt +
+                facet_wrap(ID ~ seqnames, scales = "free", ncol=1) + my_theme
         }
         
         if (!is.null(plotspath)) {

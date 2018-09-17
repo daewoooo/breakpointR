@@ -27,14 +27,32 @@
 #'breakpointr(inputfolder="my-data-folder", outputfolder="my-output-folder")}
 #'
 breakpointr <- function(inputfolder, outputfolder, configfile=NULL, numCPU=1, reuse.existing.files=FALSE, windowsize=1e6, binMethod="size", pairedEndReads=FALSE, pair2frgm=FALSE, chromosomes=NULL, min.mapq=10, filtAlt=FALSE, trim=10, peakTh=0.33, zlim=3.291, background=0.05, minReads=10, maskRegions=NULL, callHotSpots=FALSE, conf=0.99) {
-
+ 
 #=======================
-### Helper functions ###
+### Helper function ###
 #=======================
-as.object <- function(x) {
-    return(eval(parse(text=x)))
-}
-
+  
+## This parallel helper function performs breakpoint detection and export results into the pre-set locations.  
+runBreakpointrANDexport <- function(file, datapath, browserpath, config) {
+    savename <- file.path(datapath, paste0(basename(file),'.RData'))
+    ## Find breakpoints
+    if (!file.exists(savename)) {
+        tC <- tryCatch({
+            breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
+        }, error = function(err) {
+            stop(file,'\n',err)
+        })  
+        save(breakpoints, file=savename)
+    } else {
+        breakpoints <- get(load(savename))
+    }
+    ## Write BED file
+    savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
+    if (!file.exists(savename.breakpoints)) {
+        breakpointr2UCSC(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
+    }
+}  
+  
 #========================
 ### General variables ###
 #========================
@@ -133,27 +151,11 @@ if (length(files) == 0) {
     stop("No BAM files present in an 'inputfolder'.")  
 }
 
-
 ### Run breakpointR ###
 if (createCompositeFile) {
     config[['numCPU']] <- 1 #always use only one CPU for composite file analysis
-    savename <- file.path(datapath, paste0('compositeFile', '.RData'))
     fragments <- createCompositeFile(file.list=files, chromosomes=config[['chromosomes']], pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], background=config[['background']])    
-    ## Find breakpoints
-    if (!file.exists(savename)) {  
-        breakpoints <- runBreakpointr(bamfile=fragments, ID='compositeFile', pairedEndReads=config[['pairedEndReads']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
-        save(breakpoints, file=savename)
-    } else {
-        breakpoints <- get(load(savename))
-    }
-  
-    ## Write BED file
-    savename.breakpoints <- file.path(browserpath, paste0('compositeFile', '_breakPoints.bed.gz'))
-    if (!file.exists(savename.breakpoints)) {
-        breakpointr2UCSC(index='compositeFile', outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
-    }  
-  
-
+    runBreakpointrANDexport(file = fragments, datapath = datapath, browserpath = browserpath, config = config)
 } else if (numCPU > 1) {
     ## Parallelization ##
     message("Using ",config[['numCPU']]," CPUs")
@@ -162,56 +164,21 @@ if (createCompositeFile) {
   
     message("Finding breakpoints ...", appendLF=FALSE); ptm <- proc.time()
     temp <- foreach (file = files, .packages=c('breakpointR')) %dopar% {
-        savename <- file.path(datapath,paste0(basename(file),'.RData'))
-        ## Find breakpoints
-        if (!file.exists(savename)) {
-            tC <- tryCatch({
-                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
-            }, error = function(err) {
-                stop(file,'\n',err)
-            })
-            save(breakpoints, file=savename)
-        } else {
-            breakpoints <- get(load(savename))
-        }
-        ## Write BED file
-        savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
-        if (!file.exists(savename.breakpoints)) {
-            breakpointr2UCSC(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
-        }
-    
+        runBreakpointrANDexport(file = file, datapath = datapath, browserpath = browserpath, config = config)
     }
+    
     parallel::stopCluster(cl)
     time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
-
 } else {
     config[['numCPU']] <- 1 #if to use only one CPU or CPU argument not defined
     for (file in files) {
-        savename <- file.path(datapath, paste0(basename(file),'.RData'))
-        ## Find breakpoints
-        if (!file.exists(savename)) {
-            tC <- tryCatch({
-                breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
-            }, error = function(err) {
-                stop(file,'\n',err)
-            })  
-            save(breakpoints, file=savename)
-        } else {
-            breakpoints <- get(load(savename))
-        }
-        ## Write BED file
-        savename.breakpoints <- file.path(browserpath,paste0(basename(file), '_breakPoints.bed.gz'))
-        if (!file.exists(savename.breakpoints)) {
-            breakpointr2UCSC(index=basename(file), outputDirectory=browserpath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks, confidenceIntervals=breakpoints$confint)
-        }
+        runBreakpointrANDexport(file = file, datapath = datapath, browserpath = browserpath, config = config)
     }
 }
 
-
-
 ## Write masked regions to BED file
 if (!is.null(maskRegions)) {
-  ranges2UCSC(gr=maskRegions, index='MaskedRegions', outputDirectory=browserpath, colorRGB='0,0,0')
+    ranges2UCSC(gr=maskRegions, index='MaskedRegions', outputDirectory=browserpath, colorRGB='0,0,0')
 }
 
 ## Compile all breaks using disjoin function
@@ -262,7 +229,7 @@ summaryBreaks.df <- do.call(rbind, summaryBreaks)
 summaryBreaks.df$filenames <- rownames(summaryBreaks.df)
 write.table(summaryBreaks.df, file = file.path(breakspath, 'breakPointSummary.txt'), quote = FALSE, row.names = FALSE)
 
-## Synchronize read directionality [OPTIONAL] 
+## Synchronize read directionality [EXPERIMENTAL] 
 #files2sync <- list.files(datapath, pattern = ".RData", full.names = TRUE)
 #syncReads <- synchronizeReadDir(files2sync)
 #breakpointr2UCSC(index="syncReads", outputDirectory=browserpath, fragments=syncReads)

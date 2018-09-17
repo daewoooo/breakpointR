@@ -15,5 +15,7 @@
 # Do not ignore hidden .gitignore
 !.gitignore
 # Ignore data and inst
-data/*
-inst/*
+#data/*
+#inst/*
+
+.Rproj.user
