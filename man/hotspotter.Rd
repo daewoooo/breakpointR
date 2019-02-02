@@ -30,7 +30,7 @@ breakpoint.objects <- loadFromFiles(exampleFiles)
 ## Extract breakpoint coordinates
 breaks <- lapply(breakpoint.objects, '[[', 'breaks')
 ## Get hotspot coordinates
-hotspots <- hotspotter(breaks, bw=1e6)
+hotspots <- hotspotter(gr.list=breaks, bw=1e6)
 
 }
 \author{

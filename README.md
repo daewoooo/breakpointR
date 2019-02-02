@@ -8,8 +8,8 @@ Collaborators: David Porubsky, Ashley D. Sanders, Aaron Taudt
 Installation
 ------------
 
-### Stable bioconductor version (not available yet)
-Under development.
+### Stable bioconductor version
+To install the current stable version from Bioconductor, please visit http://bioconductor.org/packages/breakpointR/
 
 ### Development version from Github
 To install the development version from Github, follow the steps given below. The installation has only been tested on Ubuntu so far, if you need to install on Windows or Mac additional steps might be necessary (e.g. installation of Rtools from https://cran.r-project.org/bin/windows/Rtools/)
@@ -28,8 +28,8 @@ To install the development version from Github, follow the steps given below. Th
 
 4. To install breakpointR package from github	 
 	 #### Option1
-	 install_github("daewoooo/breakpointRdata")  
-	 install_github("daewoooo/breakpointR")  
+	 install_github("daewoooo/breakpointRdata", force=TRUE)  
+	 install_github("daewoooo/breakpointR", force=TRUE)  
 	 #### Option2 
 	 install_git("git://github.com/daewoooo/breakpointRdata.git", branch = "master")  
 	 install_git("git://github.com/daewoooo/breakpointR.git", branch = "master")  

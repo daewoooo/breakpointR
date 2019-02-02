@@ -12,10 +12,12 @@
 *~
 # Ignore hidden files
 .*
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
 # Do not ignore hidden .gitignore
 !.gitignore
 # Ignore data and inst
 #data/*
 #inst/*
-
-.Rproj.user

@@ -4,10 +4,10 @@
 \alias{writeConfig}
 \title{Write BreakpointR configuration file}
 \usage{
-writeConfig(conf, configfile)
+writeConfig(config, configfile)
 }
 \arguments{
-\item{conf}{A list structure with parameter values. Each entry will be written in one line.}
+\item{config}{A list structure with parameter values. Each entry will be written in one line.}
 
 \item{configfile}{Filename of the outputfile.}
 }
