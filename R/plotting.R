@@ -51,6 +51,13 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         lib.metrics <- paste(names(lib.metrics), lib.metrics, sep = '=')
         lib.metrics <- paste(lib.metrics, collapse = "  |  ")
         
+        #Skip chromosomes shorter then 5-times of the bin size 200kb
+        if (any(seqlengths(reads) < 200000*5)) {
+          message(" Skipping short chromosomes/contigs!")
+          keep.chroms <- names(seqlengths(reads)[seqlengths(reads) >= 200000*5])
+          reads <- GenomeInfoDb::keepSeqlevels(reads, keep.chroms, pruning.mode = 'coarse')
+        }  
+        
         binned.data <- unlist(GenomicRanges::tileGenome(seqlengths(reads), tilewidth = 200000))
         
         #counts overlaps between bins and our reads
@@ -354,18 +361,30 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
 #'exampleFiles <- list.files(exampleFolder, full.names=TRUE)
 #'## Plot results
 #'plotBreakpointsPerChr(exampleFiles, chromosomes='chr7')
-
+#'
 plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) {
 
     if (is(files2plot, class.breakpoint)) {  
         numplots <- 1
         chroms.in.data <- GenomeInfoDb::seqlevels(files2plot$fragments)
+        chrom.lengths <- GenomeInfoDb::seqlengths(files2plot$fragments)
+        #Skip chromosomes shorter then 5-times of the bin size 200kb
+        if (any(chrom.lengths < 200000*5)) {
+            message("Will skip short chromosomes/contigs!")
+            chroms.in.data <- names(chrom.lengths[chrom.lengths >= 200000*5])
+        }
         #files2plot <- list(files2plot)
     } else if (is.character(files2plot)) {
         numplots <- length(files2plot)
-        #get sequence levels from a single BreakpointR obejct
+        #get sequence levels and sequence lengths from a single BreakpointR obejct
         first.file <- loadFromFiles(files2plot[[1]], check.class=class.breakpoint)[[1]]
         chroms.in.data <- GenomeInfoDb::seqlevels(first.file$fragments)
+        chrom.lengths <- GenomeInfoDb::seqlengths(first.file$fragments)
+        #Skip chromosomes shorter then 5-times of the bin size 200kb
+        if (any(chrom.lengths < 200000*5)) {
+            message("Will skip short chromosomes/contigs!")
+            chroms.in.data <- names(chrom.lengths[chrom.lengths >= 200000*5])
+        }
     } else {
       stop("Unsupported object class submitted!!!")
     }
@@ -388,11 +407,11 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
         for (i in seq_len(numplots)) {
         
             if (is(files2plot, 'character')) {  
-              data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
+                data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)[[1]]
             } else if (is(files2plot, class.breakpoint)) {  
-              data <- files2plot
+                data <- files2plot
             } else {
-              stop("Only 'BreakPoint' class object can be plotted")
+                stop("Only 'BreakPoint' class object can be plotted")
             }
               
             bamfile <- data$ID
@@ -484,3 +503,4 @@ plotBreakpointsPerChr <- function(files2plot, plotspath=NULL, chromosomes=NULL) 
     }
     return(plots)
 }
+
