@@ -49,8 +49,8 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     
     ## remove reads from maskRegions
     if (!is.null(maskRegions)) {
-        mask <- findOverlaps(maskRegions, fragments)
-        fragments <- fragments[-S4Vectors::subjectHits(mask)]        
+        mask <- IRanges::findOverlaps(maskRegions, fragments)
+        fragments <- fragments[-S4Vectors::subjectHits(mask)]
     } 
   
     reads.all.chroms <- fragments
@@ -251,9 +251,9 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     
     ## save brekpointR results into a single obejct
     fragments <- fragments[,'mapq'] #store only mapq values to save space
+    #breaks.all.chroms$confint <- confint.all.chroms[,0] #store confidence intervals as a part of breaks object
     data.obj <- list(ID=ID, fragments=fragments, deltas=deltas.all.chroms, breaks=breaks.all.chroms, confint=confint.all.chroms, counts=counts.all.chroms, lib.metrics=library.metrics, params=parameters)
     class(data.obj) <- class.breakpoint
   
     return(data.obj)
 }
-

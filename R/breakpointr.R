@@ -38,7 +38,7 @@ runBreakpointrANDexport <- function(file, datapath, browserpath, config) {
     ## Find breakpoints
     if (!file.exists(savename)) {
         tC <- tryCatch({
-            breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=config[['maskRegions']], conf=config[['conf']])
+            breakpoints <- runBreakpointr(bamfile=file, ID=basename(file), pairedEndReads=config[['pairedEndReads']], pair2frgm=config[['pair2frgm']], min.mapq=config[['min.mapq']], filtAlt=config[['filtAlt']], chromosomes=config[['chromosomes']], windowsize=config[['windowsize']], binMethod=config[['binMethod']], trim=config[['trim']], peakTh=config[['peakTh']], zlim=config[['zlim']], background=config[['background']], minReads=config[['minReads']], maskRegions=maskRegions, conf=config[['conf']])
         }, error = function(err) {
             stop(file,'\n',err)
         })  
@@ -72,18 +72,6 @@ if (is.character(configfile)) {
 
 ## Set createCompositeFile to FALSE [experimental]
 createCompositeFile=FALSE
-
-### Mask Regions ###
-if (!is.null(maskRegions)) {
-    mask.df <- utils::read.table(maskRegions, header=FALSE, sep="\t", stringsAsFactors=FALSE)
-    if (any(mask.df$V1 %in% chromosomes)) {
-        mask.df <- mask.df[mask.df$V1 %in% chromosomes,] #select only chromosomes submitted for analysis
-        maskRegions <- GenomicRanges::GRanges(seqnames=mask.df$V1, IRanges(start=mask.df$V2, end=mask.df$V3))      
-    } else {
-        warning(paste0('Skipping maskRegions. Chromosomes names conflict: ', mask.df$V1[1], ' not equal ',chromosomes[1]))
-        maskRegions <- NULL
-    }  
-}
 
 ## Put options into list and merge with conf ##
 params <- list(numCPU=numCPU, reuse.existing.files=reuse.existing.files, windowsize=windowsize, binMethod=binMethod, pairedEndReads=pairedEndReads, pair2frgm=pair2frgm, chromosomes=chromosomes,
@@ -141,7 +129,23 @@ cat("- data: RData files storing results of BreakpointR analysis for each single
 cat("- plots: Genome-wide plots for selected chromsosome, genome-wide heatmap of strand states as well as chromosome specific read distribution together with localized breakpoints.\n", file=savename, append=TRUE)
 
 ## Make a copy of the config file ##
-writeConfig(config, configfile=file.path(outputfolder, 'breakpointR.config'))
+writeConfig(config = config, configfile=file.path(outputfolder, 'breakpointR.config'))
+
+## Load user defined mask regions ##
+if (!is.null(maskRegions)) {
+    mask.df <- utils::read.table(maskRegions, header=FALSE, sep="\t", stringsAsFactors=FALSE)
+    if (is.null(chromosomes)) {
+        maskRegions <- GenomicRanges::GRanges(seqnames=mask.df$V1, IRanges(start=mask.df$V2, end=mask.df$V3))   
+    } else {
+        if (any(mask.df$V1 %in% chromosomes)) {
+            mask.df <- mask.df[mask.df$V1 %in% chromosomes,] #select only chromosomes submitted for analysis
+            maskRegions <- GenomicRanges::GRanges(seqnames=mask.df$V1, IRanges(start=mask.df$V2, end=mask.df$V3))      
+        } else {
+            warning(paste0('Skipping maskRegions. Chromosomes names conflict: ', mask.df$V1[1], ' not equal ',chromosomes[1]))
+            maskRegions <- NULL
+        } 
+    }  
+}
 
 #=====================================
 # Find breakpoints and write BED files
@@ -185,8 +189,10 @@ if (!is.null(maskRegions)) {
 if (createCompositeFile==FALSE) {
     files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
   
-    breaks.all.files <- GenomicRanges::GRangesList()
-    breaksConfInt.all.files <- GenomicRanges::GRangesList()
+    #breaks.all.files <- GenomicRanges::GRangesList()
+    #breaksConfInt.all.files <- GenomicRanges::GRangesList()
+    breaks.all.files <- list()
+    breaksConfInt.all.files <- list()
     summaryBreaks <- list()
     for (file in files) {
         data <- get(load(file))[c('breaks', 'confint')]
@@ -201,12 +207,14 @@ if (createCompositeFile==FALSE) {
         }  
     }
     
-    breaks <- unlist(breaks.all.files, use.names=FALSE)
+    names(breaks.all.files) <- NULL
+    breaks <- do.call(c, breaks.all.files)
     ranges.br <- GenomicRanges::disjoin(breaks) # redefine ranges in df
     hits <- GenomicRanges::countOverlaps(ranges.br, breaks) # counts number of breaks overlapping at each range
     mcols(ranges.br)$hits <- hits # appends hits as a metacolumn in ranges
     
-    breaks.CI <- unlist(breaksConfInt.all.files, use.names=FALSE)
+    names(breaksConfInt.all.files) <- NULL
+    breaks.CI <- do.call(c, breaksConfInt.all.files)
     ranges.CI <- GenomicRanges::disjoin(breaks.CI) # redefine ranges in df
     hits <- GenomicRanges::countOverlaps(ranges.CI, breaks) # counts number of breaks overlapping at each range
     mcols(ranges.CI)$hits <- hits # appends hits as a metacolumn in ranges
@@ -220,7 +228,7 @@ if (createCompositeFile==FALSE) {
     summaryBreaks <- list()
     for (file in files) {
         data <- get(load(file))[c('breaks', 'confint')]
-        summaryBreaks[[basename(file)]] <- summarizeBreaks(data)
+        summaryBreaks[[basename(file)]] <- summarizeBreaks(breakpoints=data)
     }
 }
 
@@ -234,12 +242,12 @@ write.table(summaryBreaks.df, file = file.path(breakspath, 'breakPointSummary.tx
 #syncReads <- synchronizeReadDir(files2sync)
 #breakpointr2UCSC(index="syncReads", outputDirectory=browserpath, fragments=syncReads)
 
-## Search for SCE hotspots
+## Search for SCE hotspots ##
 if (callHotSpots) {
-  hotspots <- hotspotter(gr.list=breaks.all.files, bw = 1000000, pval = 1e-10)
-  if (length(hotspots)) {
-    ranges2UCSC(gr=hotspots, index='HotSpots', outputDirectory=breakspath, colorRGB='0,0,255')
-  }
+    hotspots <- hotspotter(gr.list=breaks.all.files, bw = 1000000, pval = 1e-10)
+    if (length(hotspots)) {
+        ranges2UCSC(gr=hotspots, index='HotSpots', outputDirectory=breakspath, colorRGB='0,0,255')
+    }
 }
 
 ## Plotting
