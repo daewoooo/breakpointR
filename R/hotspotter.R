@@ -20,7 +20,7 @@
 #'## Extract breakpoint coordinates
 #'breaks <- lapply(breakpoint.objects, '[[', 'breaks')
 #'## Get hotspot coordinates
-#'hotspots <- hotspotter(breaks, bw=1e6)
+#'hotspots <- hotspotter(gr.list=breaks, bw=1e6)
 #'
 hotspotter <- function(gr.list, bw, pval=1e-8) {
 
