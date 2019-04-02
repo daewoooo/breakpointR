@@ -2,7 +2,7 @@
 % Please edit documentation in R/rwConfig.R
 \name{writeConfig}
 \alias{writeConfig}
-\title{Write BreakpointR configuration file}
+\title{Write breakpointR configuration file}
 \usage{
 writeConfig(config, configfile)
 }
@@ -15,7 +15,7 @@ writeConfig(config, configfile)
 \code{NULL}
 }
 \description{
-Write an BreakpointR configuration file from a list structure.
+Write an breakpointR configuration file from a list structure.
 }
 \author{
 Aaron Taudt
