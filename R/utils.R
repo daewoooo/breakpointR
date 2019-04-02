@@ -44,3 +44,28 @@ insertchr <- function(gr) {
     mcols(gr)$chromosome <- as.factor(mcols(gr)$chromosome)
     return(gr)
 }
+
+#' Process double SCE chromsomes: with internal WC region.
+#' 
+#' This function will take from a double SCE chromosome only  WW or CC region (Longer region is taken).
+#'
+#' @param gr A \code{\link{GRanges-class}} object.
+#' @return The input \code{\link{GRanges-class}} object with only WW or CC region retained. 
+removeDoubleSCEs <- function(gr) {
+    if (any(gr$states == 'wc')) {
+        wc.idx <- which(gr$states == 'wc')
+        if (any(wc.idx > 1) & any(wc.idx < length(gr))) {
+            ## Remove wc regions
+            gr.new <- gr[-wc.idx ]
+            ## Take strand state covering largest region
+            gr.new.byState <- split(gr.new, gr.new$states)
+            state.widths <- lapply(gr.new.byState, function(x) sum(width(x)))
+            gr.new <- gr.new[gr.new$states == names(which.max(state.widths))]
+            return(gr.new)
+        } else {
+            return(gr[-wc.idx ])
+        }
+    } else {
+        return(gr)
+    }
+}
