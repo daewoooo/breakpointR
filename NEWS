@@ -11,3 +11,9 @@ Changes in version 1.1.2
 - Improved handling of small chromosomes/contigs
 - Fixed bug in masking certain genomic regions (maskRegions param)
 - Improved handling of double SCE chromosomes when synchronizing read directionality across cells
+
+Changes in version 1.2.1
+-------------------------
+
+- Added new genotyping method based on binomial probabilities
+  see parameter genoT = 'fisher' or 'binom'; default: 'fisher'

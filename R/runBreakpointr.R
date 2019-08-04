@@ -32,7 +32,7 @@
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)
 #'
-runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, minReads=20, maskRegions=NULL, conf=0.99) {
+runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, genoT='fisher', minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
     if (!is(bamfile, 'GRanges')) {  
@@ -104,7 +104,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             iter <- 1
             ptm <- startTimedMessage("    genotyping ",iter, " ...")
             utils::flush.console()
-            newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads)
+            newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads, genoT=genoT)
             prev.breaks <- breaks  
             breaks <- newBreaks
             stopTimedMessage(ptm)
@@ -113,7 +113,7 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
                 utils::flush.console()
                 iter <- iter + 1
                 ptm <- startTimedMessage("    genotyping ",iter, " ...")
-                newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads)
+                newBreaks <- GenotypeBreaks(breaks=breaks, fragments=fragments, background=background, minReads=minReads, genoT=genoT)
                 prev.breaks <- breaks  
                 breaks <- newBreaks
                 stopTimedMessage(ptm)
