@@ -16,6 +16,7 @@
 #' @param windowsize The window size used to calculate deltaWs, either number of reads or genomic size depending on \code{binMethod}.
 #' @inheritParams readBamFileAsGRanges
 #' @param binMethod Method used to calculate optimal number of reads in the window ("size", "reads"). By default \code{binMethod='size'}.
+#' @inheritParams deltaWCalculatorVariousWindows
 #' @inheritParams breakSeekr
 #' @inheritParams GenotypeBreaks
 #' @param maskRegions List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).
@@ -32,7 +33,7 @@
 #'## Run breakpointR
 #'brkpts <- runBreakpointr(exampleFile, chromosomes='chr22', pairedEndReads=FALSE)
 #'
-runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, genoT='fisher', minReads=20, maskRegions=NULL, conf=0.99) {
+runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, chromosomes=NULL, windowsize=1e6, binMethod="size", multi.sizes=NULL, trim=10, peakTh=0.33, zlim=3.291, background=0.05, min.mapq=10, pair2frgm=FALSE, filtAlt=FALSE, genoT='fisher', minReads=20, maskRegions=NULL, conf=0.99) {
 
     ## check the class of the bamfile, make GRanges object of file
     if (!is(bamfile, 'GRanges')) {  
@@ -82,14 +83,23 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
             tiles <- unlist(GenomicRanges::tileGenome(seqlengths(fragments)[chr], tilewidth = windowsize))
             counts <- GenomicRanges::countOverlaps(tiles, fragments.chr)
             reads.per.window <- max(10, round(mean(counts[counts>0], trim=0.05)))
-          
-            dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
+            ## Calculate deltaW for multiple window sizes if multiplications of initial window size are defined 
+            if (!is.null(multi.sizes) & length(multi.sizes) > 1) {
+              dw <- deltaWCalculatorVariousWindows(frags=fragments.chr, reads.per.window=reads.per.window, multi.sizes=multi.sizes)
+            } else {
+              dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
+            }  
         } else if (binMethod == "reads") {
-            ## normalize only for size of the chromosome 1
+            ## Normalize only for size of the chromosome 1
             #reads.per.window <- max(10, round(windowsize/(seqlengths(fragments)[1]/seqlengths(fragments)[chr]))) # scales the bin to chr size, anchored to chr1 (249250621 bp)
-            ## do not normalize to the size of the chromosome 1
+            ## Do not normalize to the size of the chromosome 1
             reads.per.window <- windowsize 
-            dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
+            ## Calculate deltaW for multiple window sizes if multiplications of initial window size are defined 
+            if (!is.null(multi.sizes) & length(multi.sizes) > 1) {
+              dw <- deltaWCalculatorVariousWindows(frags=fragments.chr, reads.per.window=reads.per.window, multi.sizes=multi.sizes)
+            } else {
+              dw <- deltaWCalculator(frags=fragments.chr, reads.per.window=reads.per.window)
+            }  
         }
         deltaWs <- dw[seqnames(dw)==chr]
         stopTimedMessage(ptm)

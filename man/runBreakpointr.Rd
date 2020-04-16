@@ -6,9 +6,10 @@
 \usage{
 runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
   chromosomes = NULL, windowsize = 1e+06, binMethod = "size",
-  trim = 10, peakTh = 0.33, zlim = 3.291, background = 0.05,
-  min.mapq = 10, pair2frgm = FALSE, filtAlt = FALSE,
-  genoT = "fisher", minReads = 20, maskRegions = NULL, conf = 0.99)
+  multi.sizes = NULL, trim = 10, peakTh = 0.33, zlim = 3.291,
+  background = 0.05, min.mapq = 10, pair2frgm = FALSE,
+  filtAlt = FALSE, genoT = "fisher", minReads = 20,
+  maskRegions = NULL, conf = 0.99)
 }
 \arguments{
 \item{bamfile}{A file with aligned reads in BAM format.}
@@ -22,6 +23,8 @@ runBreakpointr(bamfile, ID = basename(bamfile), pairedEndReads = TRUE,
 \item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on \code{binMethod}.}
 
 \item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). By default \code{binMethod='size'}.}
+
+\item{multi.sizes}{User defined multiplications of the original window size.}
 
 \item{trim}{The amount of outliers in deltaWs removed to calculate the stdev (10 will remove top 10\% and bottom 10\% of deltaWs).}
 

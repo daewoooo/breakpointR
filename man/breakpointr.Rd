@@ -6,11 +6,11 @@
 \usage{
 breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
   reuse.existing.files = FALSE, windowsize = 1e+06,
-  binMethod = "size", pairedEndReads = FALSE, pair2frgm = FALSE,
-  chromosomes = NULL, min.mapq = 10, filtAlt = FALSE,
-  genoT = "fisher", trim = 10, peakTh = 0.33, zlim = 3.291,
-  background = 0.05, minReads = 10, maskRegions = NULL,
-  callHotSpots = FALSE, conf = 0.99)
+  binMethod = "size", multi.sizes = NULL, pairedEndReads = FALSE,
+  pair2frgm = FALSE, chromosomes = NULL, min.mapq = 10,
+  filtAlt = FALSE, genoT = "fisher", trim = 10, peakTh = 0.33,
+  zlim = 3.291, background = 0.05, minReads = 10,
+  maskRegions = NULL, callHotSpots = FALSE, conf = 0.99)
 }
 \arguments{
 \item{inputfolder}{Folder with BAM files.}
@@ -26,6 +26,8 @@ breakpointr(inputfolder, outputfolder, configfile = NULL, numCPU = 1,
 \item{windowsize}{The window size used to calculate deltaWs, either number of reads or genomic size depending on \code{binMethod}.}
 
 \item{binMethod}{Method used to calculate optimal number of reads in the window ("size", "reads"). By default \code{binMethod='size'}.}
+
+\item{multi.sizes}{User defined multiplications of the original window size.}
 
 \item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
 
