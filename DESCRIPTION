@@ -7,7 +7,7 @@ Author: David Porubsky, Ashley Sanders, Aaron Taudt
 Maintainer: David Porubsky <david.porubsky@gmail.com>
 Description: This package implements functions for finding breakpoints, plotting and export of Strand-seq data.
 Depends:
-  R (>= 3.6),
+  R (>= 3.5),
   GenomicRanges,
   cowplot,
   breakpointRdata
