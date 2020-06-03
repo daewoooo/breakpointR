@@ -43,7 +43,6 @@ RefineBreaks <- function(gr) {
 #' @param minReads The minimal number of reads between two breaks required for genotyping.
 #' @param genoT A method ('fisher' or 'binom') to genotype regions defined by a set of breakpoints. 
 #' @return A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
-#' @importFrom stats fisher.test
 #' @importFrom S4Vectors endoapply
 #' @export
 GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10, genoT='fisher') {
@@ -52,14 +51,14 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10, geno
     }
   
     breakrange.list <- GenomicRanges::GRangesList()
-    seqlevels(breakrange.list) <- seqlevels(breaks)
+    seqlevels(breakrange.list) <- GenomeInfoDb::seqlevels(breaks)
     for (chrom in unique(seqnames(breaks))) {
           
         # create ranges between the breakpoints -> start and stops in a dataframe, use this to genotype between
         breaks.strand <- breaks[seqnames(breaks) == chrom]
         strand(breaks.strand) <- '*'
         # Remove the non-used seqlevels
-        breaks.strand <- keepSeqlevels(breaks.strand, value=chrom)
+        breaks.strand <- GenomeInfoDb::keepSeqlevels(breaks.strand, value=chrom)
         breakrange <- GenomicRanges::gaps(breaks.strand)
         breakrange <- breakrange[strand(breakrange)=='*']
         
@@ -107,7 +106,7 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10, geno
         ## Refine breakpoint regions to the highest deltaW in the given region
         hits <- GenomicRanges::findOverlaps(breakrange.new, breaks)
         ToRefine <- split(breaks[S4Vectors::subjectHits(hits)], S4Vectors::queryHits(hits))
-        refined <- unlist(endoapply(ToRefine, RefineBreaks), use.names = FALSE)
+        refined <- unlist(S4Vectors::endoapply(ToRefine, RefineBreaks), use.names = FALSE)
         ranges(breakrange.new) <- ranges(refined)
         breakrange.new$deltaW <- refined$deltaW
         return(breakrange.new)
@@ -117,11 +116,12 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10, geno
 }
 
 
-#' @describeIn genotyping Assign states to any given region.
+#' Assign states to any given region using Fisher Exact Test.
 #' @param cReads Number of Crick reads.
 #' @param wReads Number of Watson reads.
 #' @param roiReads Total number of Crick and Watson reads.
 #' @inheritParams GenotypeBreaks
+#' @importFrom stats fisher.test
 #' @return A \code{list} with the $bestFit and $pval.
 #' @author David Porubsky, Aaron Taudt
 genotype.fisher <- function(cReads, wReads, roiReads, background=0.05, minReads=10) {
@@ -150,10 +150,11 @@ genotype.fisher <- function(cReads, wReads, roiReads, background=0.05, minReads=
     }
 }
 
-#' @describeIn genotyping Assign states to any given region.
+#' Assign states to any given region using binomial test.
 #' @param log Set to \code{TRUE} if you want to calculate probability in log space.
 #' @inheritParams GenotypeBreaks
 #' @inheritParams genotype.fisher
+#' @importFrom stats dbinom
 #' @return A \code{list} with the $bestFit and $pval.
 #' @author David Porubsky
 genotype.binom <- function(wReads, cReads, background=0.05, minReads=10, log=FALSE) {

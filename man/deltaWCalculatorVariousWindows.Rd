@@ -4,8 +4,11 @@
 \alias{deltaWCalculatorVariousWindows}
 \title{Calculate deltaWs using various window sizes}
 \usage{
-deltaWCalculatorVariousWindows(frags, reads.per.window = 100,
-  multi.sizes = c(2, 4, 6))
+deltaWCalculatorVariousWindows(
+  frags,
+  reads.per.window = 100,
+  multi.sizes = c(2, 4, 6)
+)
 }
 \arguments{
 \item{frags}{A \code{\link{GRanges-class}} with read fragments (see \code{\link{readBamFileAsGRanges}}).}

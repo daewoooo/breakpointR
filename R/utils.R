@@ -45,27 +45,51 @@ insertchr <- function(gr) {
     return(gr)
 }
 
-#' Process double SCE chromsomes: with internal WC region.
+#' Process double SCE chromosomes: with internal WC region.
 #' 
-#' This function will take from a double SCE chromosome only  WW or CC region (Longer region is taken).
+#' This function will take from a double SCE chromosome only WW or CC region (Longer region is taken).
 #'
 #' @param gr A \code{\link{GRanges-class}} object.
+#' @inheritParams synchronizeReadDir
 #' @return The input \code{\link{GRanges-class}} object with only WW or CC region retained. 
-removeDoubleSCEs <- function(gr) {
+removeDoubleSCEs <- function(gr, collapseWidth=5000000) {
+    ## Helper function ##
+    fillGaps <- function(gr, collapseWidth=5000000) {
+        ## Collapse gaps smaller or equal to collapseWidth
+        gaps.gr <- suppressWarnings( GenomicRanges::gaps(gr, start = min(start(gr)), end = max(end(gr))) )
+        gaps.gr <- gaps.gr[strand(gaps.gr) == '*']
+        gr.new <- suppressWarnings( c(gr[,0], gaps.gr[width(gaps.gr) <= collapseWidth]) )
+        gr.new <- GenomicRanges::reduce(gr.new)
+        return(gr.new)
+    }    
+  
+    gr <- GenomeInfoDb::keepSeqlevels(gr, value = unique(seqnames(gr)), pruning.mode = 'coarse')
+    gr <- collapseBins(gr)
     if (any(gr$states == 'wc')) {
         wc.idx <- which(gr$states == 'wc')
         if (any(wc.idx > 1) & any(wc.idx < length(gr))) {
             ## Remove wc regions
-            gr.new <- gr[-wc.idx ]
+            gr.new <- gr[-wc.idx]
             ## Take strand state covering largest region
             gr.new.byState <- split(gr.new, gr.new$states)
             state.widths <- lapply(gr.new.byState, function(x) sum(width(x)))
+            max.state <- names(which.max(state.widths))
+            gr.new$states[width(gr.new) <= collapseWidth] <- max.state
             gr.new <- gr.new[gr.new$states == names(which.max(state.widths))]
+            ## Collapse gaps smaller or equal to collapseWidth
+            gr.new <- fillGaps(gr.new, collapseWidth=collapseWidth)
             return(gr.new)
         } else {
-            return(gr[-wc.idx ])
+            ## Remove wc regions
+            gr.new <- gr[-wc.idx]
+            ## Collapse gaps smaller or equal to collapseWidth
+            gr.new <- fillGaps(gr.new, collapseWidth=collapseWidth)
+            return(gr.new)
         }
     } else {
+        gr.new <- gr
+        ## Collapse gaps smaller or equal to collapseWidth
+        gr.new <- fillGaps(gr.new, collapseWidth=collapseWidth)
         return(gr)
     }
 }

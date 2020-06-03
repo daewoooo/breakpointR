@@ -4,9 +4,15 @@
 \alias{breakpointr2UCSC}
 \title{Export UCSC browser formated files}
 \usage{
-breakpointr2UCSC(index, outputDirectory, fragments = NULL,
-  deltaWs = NULL, breakTrack = NULL, confidenceIntervals = NULL,
-  breaksGraph = NULL)
+breakpointr2UCSC(
+  index,
+  outputDirectory,
+  fragments = NULL,
+  deltaWs = NULL,
+  breakTrack = NULL,
+  confidenceIntervals = NULL,
+  breaksGraph = NULL
+)
 }
 \arguments{
 \item{index}{A character used to name the bedfile(s).}

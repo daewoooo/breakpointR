@@ -4,8 +4,14 @@
 \alias{exportRegions}
 \title{Function to print WC regions after breakpointR analysis}
 \usage{
-exportRegions(datapath, file = NULL, collapseInversions = FALSE,
-  collapseRegionSize = 5e+06, minRegionSize = 5e+06, state = "wc")
+exportRegions(
+  datapath,
+  file = NULL,
+  collapseInversions = FALSE,
+  collapseRegionSize = 5e+06,
+  minRegionSize = 5e+06,
+  state = "wc"
+)
 }
 \arguments{
 \item{datapath}{A path to that}

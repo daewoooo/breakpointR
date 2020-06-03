@@ -2,16 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{removeDoubleSCEs}
 \alias{removeDoubleSCEs}
-\title{Process double SCE chromsomes: with internal WC region.}
+\title{Process double SCE chromosomes: with internal WC region.}
 \usage{
-removeDoubleSCEs(gr)
+removeDoubleSCEs(gr, collapseWidth = 5e+06)
 }
 \arguments{
 \item{gr}{A \code{\link{GRanges-class}} object.}
+
+\item{collapseWidth}{A segment size to be collapsed with neighbouring segments.}
 }
 \value{
 The input \code{\link{GRanges-class}} object with only WW or CC region retained.
 }
 \description{
-This function will take from a double SCE chromosome only  WW or CC region (Longer region is taken).
+This function will take from a double SCE chromosome only WW or CC region (Longer region is taken).
 }

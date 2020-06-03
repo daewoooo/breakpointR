@@ -4,8 +4,7 @@
 \alias{ranges2UCSC}
 \title{Generates a bedfile from an input GRanges file}
 \usage{
-ranges2UCSC(gr, outputDirectory = ".", index = "bedFile",
-  colorRGB = "0,0,0")
+ranges2UCSC(gr, outputDirectory = ".", index = "bedFile", colorRGB = "0,0,0")
 }
 \arguments{
 \item{gr}{A \code{\link{GRanges-class}} object with genomic ranges to be exported into UCSC format.}

@@ -3,18 +3,15 @@
 \name{genotyping}
 \alias{genotyping}
 \alias{GenotypeBreaks}
-\alias{genotype.fisher}
-\alias{genotype.binom}
 \title{Set of functions to genotype regions in between localized breakpoints}
 \usage{
-GenotypeBreaks(breaks, fragments, background = 0.05, minReads = 10,
-  genoT = "fisher")
-
-genotype.fisher(cReads, wReads, roiReads, background = 0.05,
-  minReads = 10)
-
-genotype.binom(wReads, cReads, background = 0.05, minReads = 10,
-  log = FALSE)
+GenotypeBreaks(
+  breaks,
+  fragments,
+  background = 0.05,
+  minReads = 10,
+  genoT = "fisher"
+)
 }
 \arguments{
 \item{breaks}{A \code{\link{GRanges-class}} object with breakpoint coordinates.}
@@ -26,21 +23,9 @@ genotype.binom(wReads, cReads, background = 0.05, minReads = 10,
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
 \item{genoT}{A method ('fisher' or 'binom') to genotype regions defined by a set of breakpoints.}
-
-\item{cReads}{Number of Crick reads.}
-
-\item{wReads}{Number of Watson reads.}
-
-\item{roiReads}{Total number of Crick and Watson reads.}
-
-\item{log}{Set to \code{TRUE} if you want to calculate probability in log space.}
 }
 \value{
 A \code{\link{GRanges-class}} object with genotyped breakpoint coordinates.
-
-A \code{list} with the $bestFit and $pval.
-
-A \code{list} with the $bestFit and $pval.
 }
 \description{
 Each defined region is given one of the three states ('ww', 'cc' or 'wc')
@@ -54,10 +39,6 @@ Function \code{genotype.binom} assigns states to each region based on expected c
 \section{Functions}{
 \itemize{
 \item \code{GenotypeBreaks}: Genotypes breakpoint defined regions.
-
-\item \code{genotype.fisher}: Assign states to any given region.
-
-\item \code{genotype.binom}: Assign states to any given region.
 }}
 
 \examples{
@@ -72,8 +53,4 @@ gbreaks <- GenotypeBreaks(breaks=breakpoint.objects$breaks, fragments=breakpoint
 }
 \author{
 David Porubsky, Ashley Sanders, Aaron Taudt
-
-David Porubsky, Aaron Taudt
-
-David Porubsky
 }

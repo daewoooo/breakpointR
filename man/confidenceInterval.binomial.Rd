@@ -4,8 +4,7 @@
 \alias{confidenceInterval.binomial}
 \title{Estimate confidence intervals for breakpoints}
 \usage{
-confidenceInterval.binomial(breaks, fragments, background = 0.02,
-  conf = 0.99)
+confidenceInterval.binomial(breaks, fragments, background = 0.02, conf = 0.99)
 }
 \arguments{
 \item{breaks}{Genotyped breakpoints as outputted from function \code{\link{GenotypeBreaks}}.}
