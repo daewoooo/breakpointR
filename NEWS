@@ -17,3 +17,9 @@ Changes in version 1.2.1
 
 - Added new genotyping method based on binomial probabilities
   see parameter genoT = 'fisher' or 'binom'; default: 'fisher'
+
+Changes in version 1.7.1
+-------------------------
+
+- Added new deltaW calculator that allows to define multiplication of the original window size to
+use for deltaW calculations. One can invoke this by setting 'multi.sizes' parameter.
