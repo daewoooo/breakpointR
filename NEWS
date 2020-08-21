@@ -23,3 +23,8 @@ Changes in version 1.7.1
 
 - Added new deltaW calculator that allows to define multiplication of the original window size to
 use for deltaW calculations. One can invoke this by setting 'multi.sizes' parameter.
+
+Changes in version 1.7.2
+-------------------------
+
+- Added new function to allow for removal of spikes in read coverage present in composite files.
