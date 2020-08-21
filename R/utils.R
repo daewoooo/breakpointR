@@ -93,3 +93,38 @@ removeDoubleSCEs <- function(gr, collapseWidth=5000000) {
         return(gr)
     }
 }
+
+
+#' Remove large spikes in short reads coverage
+#' 
+#' This function takes a \code{\link{GRanges-class}} object of aligned short reads
+#' and removes pockets of reads that are stacked on top of each other based on the 
+#' maximum number of reads allowed to pileup in 'max.pileup' parameter.
+#' 
+#' @param gr A \code{\link{GRanges-class}} object.
+#' @param max.pileup A maximum number of reads overlapping each other to be kept.
+#' @return A \code{\link{GRanges-class}} object.
+#' @author David Porubsky
+#' @export
+#' @examples
+#'## Get some files that you want to load
+#'exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")
+#'infile <- list.files(exampleFolder, full.names=TRUE)[1]
+#'## Read in the reads
+#'breakP.obj <- get(load(infile))
+#'frags <- breakP.obj$fragments 
+#'## Remove read spikes
+#'frags <- removeReadPileupSpikes(gr=frags)
+#'
+removeReadPileupSpikes <- function(gr=NULL, max.pileup=30) {
+  ## Get overlapping read levels
+  gr.levels <- GenomicRanges::disjointBins(gr, ignore.strand=TRUE)
+  gr$gr.levels <- gr.levels
+  ## Get regions above set pileup threshold
+  gr.spikes <- gr[gr$gr.levels >= max.pileup]
+  ## Get all reads/ranges overlapping with defined pileup spikes
+  gr.filt.regions <- IRanges::subsetByOverlaps(gr, reduce(gr.spikes))
+  ## Return filtered ranges
+  gr <- IRanges::subsetByOverlaps(gr, gr.filt.regions, invert = TRUE)
+  return(gr)
+}
