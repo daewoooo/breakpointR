@@ -43,6 +43,12 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     } else {
         fragments <- bamfile
         bamfile <- 'CompositeFile'
+        chroms.in.data <- seqlevels(fragments)
+        if (is.null(chromosomes)) {
+          chromosomes <- chroms.in.data
+        }
+        chroms2use <- intersect(chromosomes, chroms.in.data)
+        fragments <- keepSeqlevels(fragments, value = chroms2use, pruning.mode = 'coarse')
     }
   
     filename <- basename(bamfile)
@@ -245,9 +251,14 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     bg.estim <- mean(bg.estim.ww, bg.estim.cc) 
     
     ## Calculate reads per megabase
-    tiles <- unlist(GenomicRanges::tileGenome(seqlengths(fragments), tilewidth = 1000000))
-    counts <- GenomicRanges::countOverlaps(tiles, fragments)
-    reads.MB <- round(median(counts))
+    chr.lengths <- seqlengths(fragments)[!is.na(seqlengths(fragments))]
+    if (length(chr.lengths) > 0) {
+      tiles <- unlist(GenomicRanges::tileGenome(chr.lengths, tilewidth = 1000000))
+      counts <- GenomicRanges::countOverlaps(tiles, fragments)
+      reads.MB <- round(median(counts))
+    } else {
+      reads.MB <- NA
+    }  
     
     ## Calculate % of the genome covered
     red.frags <- GenomicRanges::reduce(fragments)
