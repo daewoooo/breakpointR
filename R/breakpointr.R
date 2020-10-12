@@ -213,19 +213,24 @@ if (createCompositeFile==FALSE) {
     
     names(breaks.all.files) <- NULL
     breaks <- do.call(c, breaks.all.files)
-    ranges.br <- GenomicRanges::disjoin(breaks) # redefine ranges in df
-    hits <- GenomicRanges::countOverlaps(ranges.br, breaks) # counts number of breaks overlapping at each range
-    mcols(ranges.br)$hits <- hits # appends hits as a metacolumn in ranges
+    if (length(breaks) > 0) {
+      ranges.br <- GenomicRanges::disjoin(breaks) # redefine ranges in df
+      hits <- GenomicRanges::countOverlaps(ranges.br, breaks) # counts number of breaks overlapping at each range
+      mcols(ranges.br)$hits <- hits # appends hits as a metacolumn in ranges
+      
+      names(breaksConfInt.all.files) <- NULL
+      breaks.CI <- do.call(c, breaksConfInt.all.files)
+      ranges.CI <- GenomicRanges::disjoin(breaks.CI) # redefine ranges in df
+      hits <- GenomicRanges::countOverlaps(ranges.CI, breaks) # counts number of breaks overlapping at each range
+      mcols(ranges.CI)$hits <- hits # appends hits as a metacolumn in ranges
     
-    names(breaksConfInt.all.files) <- NULL
-    breaks.CI <- do.call(c, breaksConfInt.all.files)
-    ranges.CI <- GenomicRanges::disjoin(breaks.CI) # redefine ranges in df
-    hits <- GenomicRanges::countOverlaps(ranges.CI, breaks) # counts number of breaks overlapping at each range
-    mcols(ranges.CI)$hits <- hits # appends hits as a metacolumn in ranges
-  
-    ## write a bedgraph of data (overlapping breaks)
-    breakpointr2UCSC(index='BreakpointSummary', outputDirectory=breakspath, breaksGraph=ranges.br)
-    breakpointr2UCSC(index='BreakpointConfIntSummary', outputDirectory=breakspath, breaksGraph=ranges.CI)
+      ## write a bedgraph of data (overlapping breaks)
+      breakpointr2UCSC(index='BreakpointSummary', outputDirectory=breakspath, breaksGraph=ranges.br)
+      breakpointr2UCSC(index='BreakpointConfIntSummary', outputDirectory=breakspath, breaksGraph=ranges.CI)
+    } else {
+      stop("NO breakpoints detected, make sure 'pairedEndReads' parameter was correctly defined 
+           and if you are working with correct Strand-seq data!!!")
+    }   
 } else {
     files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
   

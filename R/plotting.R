@@ -43,6 +43,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         
         bamfile <- data$ID
         reads <- data$fragments
+        
         chroms2plot <- GenomeInfoDb::seqlevels(reads)
         breaks <- data$breaks
         counts <- data$counts
