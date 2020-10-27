@@ -1,7 +1,7 @@
 Package: breakpointR
 Type: Package
 Title: Find breakpoints in Strand-seq data
-Version: 1.7.4
+Version: 1.8.0
 Date: 2015-10-05
 Author: David Porubsky, Ashley Sanders, Aaron Taudt
 Maintainer: David Porubsky <david.porubsky@gmail.com>
