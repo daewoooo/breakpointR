@@ -23,6 +23,15 @@ A \code{list} with the $bestFit and $pval.
 \description{
 Assign states to any given region using Fisher Exact Test.
 }
+\examples{
+## Get Crick and Watson read counts
+## Crick read count
+cReads <- 30
+## Watson read count
+wReads <- 5  
+genotype.fisher(cReads = cReads, wReads = wReads, roiReads = cReads + wReads, background = 0.05, minReads = 10)
+
+}
 \author{
 David Porubsky, Aaron Taudt
 }

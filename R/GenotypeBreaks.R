@@ -124,6 +124,15 @@ GenotypeBreaks <- function(breaks, fragments, background=0.05, minReads=10, geno
 #' @importFrom stats fisher.test
 #' @return A \code{list} with the $bestFit and $pval.
 #' @author David Porubsky, Aaron Taudt
+#' @export
+#' @examples 
+#'## Get Crick and Watson read counts
+#'## Crick read count
+#'cReads <- 30
+#'## Watson read count
+#'wReads <- 5  
+#'genotype.fisher(cReads = cReads, wReads = wReads, roiReads = cReads + wReads, background = 0.05, minReads = 10)
+#'
 genotype.fisher <- function(cReads, wReads, roiReads, background=0.05, minReads=10) {
     ## FISHER EXACT TEST
     result <- list(bestFit=NA, pval=NA)
@@ -157,6 +166,15 @@ genotype.fisher <- function(cReads, wReads, roiReads, background=0.05, minReads=
 #' @importFrom stats dbinom
 #' @return A \code{list} with the $bestFit and $pval.
 #' @author David Porubsky
+#' @export
+#' @examples 
+#'## Get Crick and Watson read counts
+#'## Crick read count
+#'cReads <- 30
+#'## Watson read count
+#'wReads <- 5  
+#'genotype.binom(cReads = cReads, wReads = wReads, background = 0.05, minReads = 10, log = TRUE)
+#'
 genotype.binom <- function(wReads, cReads, background=0.05, minReads=10, log=FALSE) {
     ## Set parameters
     roiReads <- wReads + cReads

@@ -23,6 +23,15 @@ A \code{list} with the $bestFit and $pval.
 \description{
 Assign states to any given region using binomial test.
 }
+\examples{
+## Get Crick and Watson read counts
+## Crick read count
+cReads <- 30
+## Watson read count
+wReads <- 5  
+genotype.binom(cReads = cReads, wReads = wReads, background = 0.05, minReads = 10, log = TRUE)
+
+}
 \author{
 David Porubsky
 }
