@@ -1,13 +1,8 @@
 Package: breakpointR
 Type: Package
 Title: Find breakpoints in Strand-seq data
-<<<<<<< HEAD
-Version: 1.7.6
-Date: 2015-10-05
-=======
 Version: 1.13.1
 Date: 2021-11-20
->>>>>>> upstream/master
 Author: David Porubsky, Ashley Sanders, Aaron Taudt
 Maintainer: David Porubsky <david.porubsky@gmail.com>
 Description: This package implements functions for finding breakpoints, plotting and export of Strand-seq data.
