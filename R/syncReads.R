@@ -54,7 +54,8 @@ synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
                 }
             }
         }
-        
+        ## Keep only standard states
+        region.counts <- region.counts[region.counts$states %in% c('ww', 'cc', 'wc')]
         ## For WW and CC regions separated by WC region take only the larger one
         regions.per.chr <- split(region.counts, as.character(seqnames(region.counts)))
         suppressWarnings( WWandCC.regions.grl <- S4Vectors::endoapply(regions.per.chr, function(x) removeDoubleSCEs(x, collapseWidth = collapseWidth)) )
