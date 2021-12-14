@@ -127,7 +127,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         
         ### PLOT COUNTS
       
-        ## Scaling size of the rectangle to amout of reads in a given region
+        ## Scaling size of the rectangle to amount of reads in a given region
         scale <- (dfplot.counts[,c('Ws','Cs')] / dfplot.counts$width) * 1000000
           
         ## filter regions small regions => hard to see on the plot
@@ -156,7 +156,7 @@ plotBreakpoints <- function(files2plot, file=NULL) {
         ggplt2 <- ggplot(dfplot.counts) +
             geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand')) +
             geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') +
-            scale_fill_manual(values=c("sandybrown","paleturquoise4"))
+            scale_fill_manual(values=c("W" = "sandybrown","C" = "paleturquoise4"))
         if (nrow(dfplot.breaks) > 0) {
             ggplt2 <- ggplt2 + 
                 geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) +
