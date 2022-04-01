@@ -36,7 +36,8 @@ synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
     ## Load data of class BreakPoint
     data <- loadFromFiles(files2sync)
 
-    allLibs.syncReads <- GenomicRanges::GRangesList()
+    #allLibs.syncReads <- GenomicRanges::GRangesList()
+    allLibs.syncReads <- list()
     for (i in seq_along(data)) {
         lib.results <- data[[i]]
         region.counts <- lib.results$counts
@@ -61,7 +62,6 @@ synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
         suppressWarnings( WWandCC.regions.grl <- S4Vectors::endoapply(regions.per.chr, function(x) removeDoubleSCEs(x, collapseWidth = collapseWidth)) )
         #WWandCC.regions <- region.counts[region.counts$states != 'wc']
         #WWandCC.regions.grl <- GenomicRanges::split(WWandCC.regions, seqnames(WWandCC.regions))
-        
         #WWandCC.regions.collapsed <- endoapply(WWandCC.regions.grl, collapseBins)
         #WWandCC.regions.collapsed <- unlist(WWandCC.regions.collapsed, use.names=FALSE)
         WWandCC.regions.collapsed <- unlist(WWandCC.regions.grl, use.names=FALSE)
@@ -79,7 +79,8 @@ synchronizeReadDir <- function(files2sync, collapseWidth=5000000) {
         WWandCC.regions.frags.sync <- unlist(WWandCC.regions.frags.grl, use.names=FALSE)
         allLibs.syncReads[[i]] <- WWandCC.regions.frags.sync
     }
-    syncReads <- unlist(allLibs.syncReads)
+    #syncReads <- unlist(allLibs.syncReads)
+    syncReads <- do.call(c, allLibs.syncReads)
     syncReads <- GenomicRanges::sort(syncReads, ignore.strand=TRUE)
     
     stopTimedMessage(ptm)

@@ -63,7 +63,7 @@ removeDoubleSCEs <- function(gr, collapseWidth=5000000) {
         return(gr.new)
     }    
   
-    gr <- GenomeInfoDb::keepSeqlevels(gr, value = unique(seqnames(gr)), pruning.mode = 'coarse')
+    #gr <- GenomeInfoDb::keepSeqlevels(gr, value = unique(seqnames(gr)), pruning.mode = 'coarse')
     gr <- collapseBins(gr)
     if (any(gr$states == 'wc')) {
         wc.idx <- which(gr$states == 'wc')
@@ -90,7 +90,7 @@ removeDoubleSCEs <- function(gr, collapseWidth=5000000) {
         gr.new <- gr
         ## Collapse gaps smaller or equal to collapseWidth
         gr.new <- fillGaps(gr.new, collapseWidth=collapseWidth)
-        return(gr)
+        return(gr.new)
     }
 }
 
