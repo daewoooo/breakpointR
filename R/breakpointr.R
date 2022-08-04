@@ -65,7 +65,7 @@ if (is.character(configfile)) {
     }, error = function(err) {
         errstring <- paste0("Could not read configuration file ",configfile)
     })
-    if (errstring!='') {
+    if (errstring != '') {
         stop(errstring)
     }
 }
@@ -190,7 +190,7 @@ if (!is.null(maskRegions)) {
 }
 
 ## Compile all breaks using disjoin function
-if (createCompositeFile==FALSE) {
+if (createCompositeFile == FALSE) {
     files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
   
     #breaks.all.files <- GenomicRanges::GRangesList()
@@ -228,8 +228,8 @@ if (createCompositeFile==FALSE) {
       breakpointr2UCSC(index='BreakpointSummary', outputDirectory=breakspath, breaksGraph=ranges.br)
       breakpointr2UCSC(index='BreakpointConfIntSummary', outputDirectory=breakspath, breaksGraph=ranges.CI)
     } else {
-      stop("NO breakpoints detected, make sure 'pairedEndReads' parameter was correctly defined 
-           and if you are working with correct Strand-seq data!!!")
+      warning("NO breakpoints detected, make sure 'pairedEndReads' parameter was correctly defined 
+               and if you are working with correct Strand-seq data!!!")
     }   
 } else {
     files <- list.files(datapath, pattern=".RData$", full.names=TRUE)
@@ -260,7 +260,7 @@ if (callHotSpots) {
 }
 
 ## Plotting
-if (createCompositeFile==FALSE) {
+if (createCompositeFile == FALSE) {
     files2plot <- list.files(datapath, pattern = ".RData", full.names = TRUE)
     plotBreakpoints(files2plot=files2plot, file=file.path(plotspath, 'breaksPlot.pdf')) -> beQuiet
     plotBreakpointsPerChr(files2plot=files2plot, plotspath=plotspath) -> beQuiet

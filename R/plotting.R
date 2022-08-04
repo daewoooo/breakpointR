@@ -126,65 +126,68 @@ plotBreakpoints <- function(files2plot, file=NULL) {
             ggtitle(bamfile, subtitle = lib.metrics)
         
         ### PLOT COUNTS
-      
-        ## Scaling size of the rectangle to amount of reads in a given region
-        scale <- (dfplot.counts[,c('Ws','Cs')] / dfplot.counts$width) * 1000000
+        if (nrow(dfplot.counts) > 0) {
+          ## Scaling size of the rectangle to amount of reads in a given region
+          scale <- (dfplot.counts[,c('Ws','Cs')] / dfplot.counts$width) * 1000000
+            
+          ## filter regions small regions => hard to see on the plot
+          outlier.W <- stats::quantile(scale$Ws, 0.9)
+          outlier.C <- stats::quantile(scale$Cs, 0.9)
           
-        ## filter regions small regions => hard to see on the plot
-        outlier.W <- stats::quantile(scale$Ws, 0.9)
-        outlier.C <- stats::quantile(scale$Cs, 0.9)
-        
-        #set.max.W <- round(max(scale$Ws[scale$Ws < outlier.W]))
-        #set.max.C <- round(max(scale$Cs[scale$Cs < outlier.C]))  
-        #scale$Ws[scale$Ws > outlier.W] <- set.max.W
-        #scale$Cs[scale$Cs > outlier.C] <- set.max.C
-        
-        scale$Ws[scale$Ws >= outlier.W] <- outlier.W
-        scale$Cs[scale$Cs >= outlier.C] <- outlier.C
-            
-        ## putting scaled and filtered regions into a data frame
-        names(scale) <- c('W.scaled', 'C.scaled')
-        df.W <- cbind(dfplot.counts, scaled=scale$W.scaled, fill.strand=rep('W', length(scale$W.scaled)) )
-        df.C <- cbind(dfplot.counts, scaled=-scale$C.scaled, fill.strand=rep('C', length(scale$W.scaled)) )
-        dfplot.counts <- rbind(df.W, df.C)
-        
-        dfplot.counts <- dfplot.counts[dfplot.counts$width > 20000,]
-        
-        #get midpoint values for each breakpoint
-        dfplot.breaks$midpoint <- dfplot.breaks$start.genome + ( (dfplot.breaks$end.genome - dfplot.breaks$start.genome) %/% 2)
-        
-        ggplt2 <- ggplot(dfplot.counts) +
-            geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand')) +
-            geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') +
-            scale_fill_manual(values=c("W" = "sandybrown","C" = "paleturquoise4"))
-        if (nrow(dfplot.breaks) > 0) {
-            ggplt2 <- ggplt2 + 
-                geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) +
-                xlab(NULL) +
-                ylab("Breaks") +
-                scale_x_continuous(expand = c(0,0)) +
-                theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
-                my_theme  
+          #set.max.W <- round(max(scale$Ws[scale$Ws < outlier.W]))
+          #set.max.C <- round(max(scale$Cs[scale$Cs < outlier.C]))  
+          #scale$Ws[scale$Ws > outlier.W] <- set.max.W
+          #scale$Cs[scale$Cs > outlier.C] <- set.max.C
+          
+          scale$Ws[scale$Ws >= outlier.W] <- outlier.W
+          scale$Cs[scale$Cs >= outlier.C] <- outlier.C
+              
+          ## putting scaled and filtered regions into a data frame
+          names(scale) <- c('W.scaled', 'C.scaled')
+          df.W <- cbind(dfplot.counts, scaled=scale$W.scaled, fill.strand=rep('W', length(scale$W.scaled)) )
+          df.C <- cbind(dfplot.counts, scaled=-scale$C.scaled, fill.strand=rep('C', length(scale$W.scaled)) )
+          dfplot.counts <- rbind(df.W, df.C)
+          
+          dfplot.counts <- dfplot.counts[dfplot.counts$width > 20000,]
+          
+          #get midpoint values for each breakpoint
+          dfplot.breaks$midpoint <- dfplot.breaks$start.genome + ( (dfplot.breaks$end.genome - dfplot.breaks$start.genome) %/% 2)
+          
+          ggplt2 <- ggplot(dfplot.counts) +
+              geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax='scaled', fill='fill.strand')) +
+              geom_linerange(data=chr.lines, aes_string(ymin=-Inf, ymax=Inf, x='y'), col='black') +
+              scale_fill_manual(values=c("W" = "sandybrown","C" = "paleturquoise4"))
+          if (nrow(dfplot.breaks) > 0) {
+              ggplt2 <- ggplt2 + 
+                  geom_point(data=dfplot.breaks, aes_string(x='midpoint', y=0), size=5, color='red', shape=124, inherit.aes = FALSE) +
+                  xlab(NULL) +
+                  ylab("Breaks") +
+                  scale_x_continuous(expand = c(0,0)) +
+                  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
+                  my_theme  
+          } else {
+              ggplt2 <- ggplt2 +
+                  xlab(NULL) +
+                  ylab("Breaks") +
+                  scale_x_continuous(expand = c(0,0)) +
+                  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
+                  my_theme
+          }
+      
+          ### PLOT STATES
+          ggplt3 <- ggplot(dfplot.counts) +
+              geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax=10, fill='states')) +
+              geom_linerange(data=chr.lines, aes_string(ymin=0, ymax=10, x='y'), col='black') +
+              xlab("Chromosomes") +
+              ylab("States") +
+              scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) +
+              scale_fill_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) +
+              theme(axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
+              my_theme
         } else {
-            ggplt2 <- ggplt2 +
-                xlab(NULL) +
-                ylab("Breaks") +
-                scale_x_continuous(expand = c(0,0)) +
-                theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
-                my_theme
-        }
-            
-        ### PLOT STATES
-        
-        ggplt3 <- ggplot(dfplot.counts) +
-            geom_rect(aes_string(xmin='start.genome', xmax='end.genome', ymin=0, ymax=10, fill='states')) +
-            geom_linerange(data=chr.lines, aes_string(ymin=0, ymax=10, x='y'), col='black') +
-            xlab("Chromosomes") +
-            ylab("States") +
-            scale_x_continuous(breaks=chr.label.pos, labels=names(chr.label.pos), expand = c(0,0)) +
-            scale_fill_manual(values=c('cc'="paleturquoise4", 'wc'="olivedrab",'ww'="sandybrown",'?'="red")) +
-            theme(axis.text.y=element_blank(), axis.ticks.y=element_blank()) +
-            my_theme
+          ggplt2 <- ggplot()
+          ggplt3 <- ggplot()
+        }   
         
         ### PLOT ALL
       
@@ -243,17 +246,19 @@ plotHeatmap <- function(files2plot, file=NULL, hotspots=NULL) {
     ptm <- startTimedMessage("Preparing heatmap from ",numlibs2plot, " libraries ...")
 
     IDs <- list()
-    grl <- GRangesList()
-    breaks <- GRangesList()
+    grl <- GenomicRanges::GRangesList()
+    breaks <- GenomicRanges::GRangesList()
     for (i in seq_len(numlibs2plot)) {  
         data <- loadFromFiles(files2plot[i], check.class=class.breakpoint)
-        IDs[[i]] <- data[[1]]$ID
-        grl[[i]] <- data[[1]]$counts
-        suppressWarnings( breaks[[i]] <- data[[1]]$breaks )
+        if (length(data[[1]]$counts) > 0) { ## Do not plot libraries with no exported strand-state regions
+          IDs[[length(IDs) + 1]] <- data[[1]]$ID
+          grl[[length(grl) + 1]] <- data[[1]]$counts
+          suppressWarnings( breaks[[length(breaks) + 1]] <- data[[1]]$breaks )
+        }  
     }
     
     #transform genomic ranges to genome-wide coordinates
-    grl <- endoapply(grl, transCoord)
+    grl <- S4Vectors::endoapply(grl, transCoord)
     
     GenomeInfoDb::seqlevels(breaks) <- GenomeInfoDb::seqlevels(grl)
     GenomeInfoDb::seqlengths(breaks) <- GenomeInfoDb::seqlengths(grl)
