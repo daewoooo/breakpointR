@@ -38,9 +38,9 @@ Function \code{genotype.binom} assigns states to each region based on expected c
 }
 \section{Functions}{
 \itemize{
-\item \code{GenotypeBreaks}: Genotypes breakpoint defined regions.
-}}
+\item \code{GenotypeBreaks()}: Genotypes breakpoint defined regions.
 
+}}
 \examples{
 ## Get an example file 
 exampleFolder <- system.file("extdata", "example_results", package="breakpointRdata")

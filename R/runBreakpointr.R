@@ -19,7 +19,7 @@
 #' @inheritParams deltaWCalculatorVariousWindows
 #' @inheritParams breakSeekr
 #' @inheritParams GenotypeBreaks
-#' @param maskRegions List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).
+#' @param maskRegions List of regions to be excluded from the analysis in \code{\link{GRanges-class}} object.
 #' @inheritParams confidenceInterval
 #' @return A \code{\link{BreakPoint}} object.
 #' @author David Porubsky, Ashley Sanders, Aaron Taudt
@@ -57,7 +57,9 @@ runBreakpointr <- function(bamfile, ID=basename(bamfile), pairedEndReads=TRUE, c
     ## remove reads from maskRegions
     if (!is.null(maskRegions)) {
         mask <- IRanges::findOverlaps(maskRegions, fragments)
-        fragments <- fragments[-S4Vectors::subjectHits(mask)]
+        if (length(mask) > 0) {
+          fragments <- fragments[-S4Vectors::subjectHits(mask)]
+        }  
     } 
   
     reads.all.chroms <- fragments

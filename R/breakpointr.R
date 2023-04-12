@@ -8,6 +8,7 @@
 #' @param numCPU The numbers of CPUs that are used. Should not be more than available on your machine.
 #' @param reuse.existing.files A logical indicating whether or not existing files in \code{outputfolder} should be reused.
 #' @param callHotSpots Search for regions of high abundance of breakpoints in single cells.
+#' @param maskRegions List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).
 
 #' @inheritParams runBreakpointr
 #' @inheritParams readBamFileAsGRanges

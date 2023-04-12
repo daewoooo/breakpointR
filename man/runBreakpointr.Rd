@@ -58,7 +58,7 @@ runBreakpointr(
 
 \item{minReads}{The minimal number of reads between two breaks required for genotyping.}
 
-\item{maskRegions}{List of regions to be excluded from the analysis (tab-separated file: chromosomes start end).}
+\item{maskRegions}{List of regions to be excluded from the analysis in \code{\link{GRanges-class}} object.}
 
 \item{conf}{Desired confidence interval of localized breakpoints.}
 }
